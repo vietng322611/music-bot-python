@@ -3,5 +3,4 @@
   "ffmpeg path": "./ffmepg/bin/ffmpeg.exe",
   "log path": "./logs/",
   "release": "v0.1",
-  "resolution": "1280*600"
 }
