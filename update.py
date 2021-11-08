@@ -1,13 +1,16 @@
 import requests
 import json
 import patoolib
-import os
 import time
 import urllib
 
-url = "https://api.github.com/repos/vietng322611/simple-python-discord-bot/releases/latest"
+url = "https://api.github.com/repos/vietng322611/music-bot-python/releases/latest"
 response = requests.get(url)
-latest_release = response.json()["html_url"].strip("https://github.com/vietng322611/simple-python-discord-bot/releases/tag/v")
+if response.status_code != 200:
+   print("Can't fetch latest version, abort")
+   time.sleep(2)
+   exit()
+latest_release = response.json()["html_url"].strip("https://github.com/vietng322611/music-bot-python/releases/tag/v")
 f = open("../config.json")
 current_release = json.load(f)
 if current_release["release"].strip('v') < latest_release:
@@ -17,6 +20,6 @@ if current_release["release"].strip('v') < latest_release:
    package_url = requests.get(assets_url).json()["browser_download_url"]
    urllib.request.urlretrieve(package_url, './')
    patoolib.extract_archive("main.py", outdir='./')
+   patoolib.extract_archive("config.json", outdir='./')
 print('Done')
 time.sleep(2)
-exit()
