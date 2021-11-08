@@ -2,6 +2,6 @@
   "check update on start": "True",
   "ffmpeg path": "./ffmepg/bin/ffmpeg.exe",
   "log path": "./logs/",
-  "release": "v1.1",
+  "release": "v0.1",
   "resolution": "1280*600"
 }
