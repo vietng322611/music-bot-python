@@ -2,6 +2,8 @@ import os
 import re
 import requests
 import asyncio
+import json
+import sys
 
 from discord import FFmpegPCMAudio
 from youtube_dl import YoutubeDL as youtubedl
@@ -9,6 +11,17 @@ from bs4 import BeautifulSoup as bs
 from discord.ext import commands
 from discord.utils import get
 from dotenv import load_dotenv
+from datetime import datetime
+
+class logger():
+    def __init__(self):
+        self.stdout = sys.stdout
+    def flush(self):
+        pass
+    def write(self, text):
+        text = text.rstrip()
+        self.stdout.write('%s %s\n' % (datetime.now().strftime('%H:%M:%S'), text))
+        return
 
 load_dotenv()
 TOKEN = os.getenv('BOT_TOKEN')
@@ -22,6 +35,10 @@ banned_words = ['lỏd'] # if you don't need you can delete it
 creator = 853514227738214421
 ydl_opts = {'format': 'bestaudio', 'noplaylist':'True'}
 FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
+log_dir = json.load(open('./config.json'))['log path']
+log = open(log_dir + 'log-' + str(datetime.now().date()) + '.txt', 'w')
+sys.stdout = logger()
+log = logger()
 
 def get_video_info(url):
     r = requests.get(url)
@@ -233,3 +250,4 @@ async def show_banned_words(ctx):
     return await ctx.message.send(f'**Banned words :**{banned_words}')
 
 bot.run(TOKEN)
+log.close()
