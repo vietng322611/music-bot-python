@@ -2,9 +2,5 @@
   "check update on start": "True",
   "ffmpeg path": "./ffmepg/bin/ffmpeg.exe",
   "log path": "./logs/",
-<<<<<<< HEAD
   "release": "v0.1"
-=======
-  "release": "v0.1",
->>>>>>> 5a6abd5dd5748eb8865c098669f01ffd3b97a539
 }
