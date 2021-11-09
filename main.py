@@ -33,8 +33,11 @@ GUILD = os.getenv('GUILD')
 bot = commands.Bot(command_prefix='!!')
 queue = []
 queue_info = []
+<<<<<<< HEAD
 banned_words_spam = {}
 banned_words = ['lỏd'] # if you don't need you can delete it
+=======
+>>>>>>> 5a6abd5dd5748eb8865c098669f01ffd3b97a539
 creator = 853514227738214421
 ydl_opts = {'format': 'bestaudio', 'noplaylist':'True'}
 FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
