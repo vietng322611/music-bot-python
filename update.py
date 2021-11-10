@@ -1,4 +1,4 @@
-# This made by vietng322611, please be respect, don't copy it without permission, you can change the code inside into your code.
+# This made by vietng322611, please respect, do not copy without permission, you can change the code inside to your own.
 
 import requests
 from zipfile import ZipFile
