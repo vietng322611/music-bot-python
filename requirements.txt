@@ -1,0 +1,6 @@
+beautifulsoup4
+discord.py
+requests
+python-dotenv
+json
+youtube_dl
