@@ -89,7 +89,7 @@ async def on_message(message):
     inp = message.content
     if message.author == bot.user:
         return
-    if message.author.id != creator:
+    if message.author.top_role.permissions.administrator == False:
         for i in banned_words:
             if i in inp.lower():
                 await message.delete()
