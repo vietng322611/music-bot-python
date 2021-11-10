@@ -8,7 +8,7 @@ import asyncio
 import json
 import sys
 
-from discord import FFmpegPCMAudio
+from discord import FFmpegPCMAudio, user
 from youtube_dl import YoutubeDL as youtubedl
 from bs4 import BeautifulSoup as bs
 from discord.ext import commands
@@ -21,15 +21,15 @@ config = json.load(open('./config.json'))
 sys.stdout = logger(config)
 if config["Check_Update_On_Start"] == "True":
     update(config)
-sys.path.append(config["Directory"] + config["ffmpeg"].strip("."))
 load_dotenv()
 TOKEN = os.getenv('BOT_TOKEN')
 GUILD = os.getenv('GUILD')
 
-bot = commands.Bot(command_prefix='!!')
+bot = commands.Bot(description="A simple bot made by vietng322611", command_prefix='!!')
 queue = []
 queue_info = []
 banned_words_spam = {}
+creator = 0
 banned_words = ['lỏd'] # if you don't need you can delete it
 ydl_opts = {'format': 'bestaudio', 'noplaylist':'True'}
 FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
@@ -89,7 +89,7 @@ async def on_message(message):
     inp = message.content
     if message.author == bot.user:
         return
-    if message.author.server_permissions.administrator == False:
+    if message.author.id != creator:
         for i in banned_words:
             if i in inp.lower():
                 await message.delete()
@@ -117,7 +117,7 @@ async def leave(ctx):
     else:
         return await ctx.message.channel.send("I'm not in a voice channel now" )
 
-@bot.command(name='play', help='Play music from url')
+@bot.command(name='play', help='Play music from url or search for music')
 async def play(ctx):
     input = ctx.message.content
     url = input.strip('!!play ')
@@ -144,24 +144,33 @@ async def play(ctx):
         await ctx.message.channel.send('Added to queue')
     return
 
-@bot.command(name='stop', help='Stop player')
+@bot.command(name='stop', help='Stop bot playing songs')
 async def stop(ctx):
     voice = ctx.message.guild.voice_client
     if voice == None:
-        await ctx.channel.send("I wasn't in a voice channel")
+        await ctx.channel.send("I'm not playing anything")
         return
-    voice.stop()
-    await ctx.message.channel.send('Stopped')
-    if queue == []:
-        await voice.disconnect()
-    else:
-        await playing(ctx, voice)
+    else:      
+        if queue == []:
+            await voice.disconnect()
+            await ctx.message.channel.send('Stopped')
+        else:
+            await ctx.message.channel.send('If you want to stop the bot immediately, type stop')
+            user_input = await bot.wait_for("message", timeout=15)
+            if user_input == 'stop':
+                voice.stop()
+                await ctx.message.channel.send('Stopped')
+            else:
+                await ctx.message.channel.send('I will playing the next song')
+                await playing(ctx, voice)
     return
 
 @bot.command(name='skip', help='Skip to next song in queue')
 async def skip(ctx):
     voice = ctx.message.guild.voice_client
-    if queue != []:
+    if voice == None:
+        await ctx.message.channel.send("I'm not playing anything")
+    elif queue != []:
         voice.stop()
         await playing(ctx, voice)
         return
@@ -169,7 +178,7 @@ async def skip(ctx):
         await ctx.message.channel.send('No song left')
     return
 
-@bot.command(name='search', help='Search for a song on youtube and get first result add to queue')
+@bot.command(name='search', help='Search for a song on youtube and add result to queue')
 async def search(ctx):
     input = ctx.message.content
     req = input.strip('!!search ')
