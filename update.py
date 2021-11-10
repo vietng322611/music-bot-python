@@ -17,10 +17,10 @@ def update(config):
       if float(release) < float(latest_release):
          print(f'Downloading release: {latest_release}')
          package_url = response.json()["assets"][0]["browser_download_url"]
-         urllib.request.urlretrieve(package_url, "./bot-project.rar")
-         with ZipFile("bot-project.rar", 'r') as zip:
+         urllib.request.urlretrieve(package_url, "./bot-project.zip")
+         with ZipFile("bot-project.zip", 'r') as zip:
             zip.extractall("./")
-         os.remove("bot-project.rar")
+         os.remove("bot-project.zip")
          print('Update is done')
       else:
          print("This is the latest release")
