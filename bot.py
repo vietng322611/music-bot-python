@@ -31,7 +31,6 @@ queue = []
 queue_info = []
 banned_words_spam = {}
 banned_words = ['lỏd'] # if you don't need you can delete it
-creator = 853514227738214421
 ydl_opts = {'format': 'bestaudio', 'noplaylist':'True'}
 FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
 
@@ -121,8 +120,6 @@ async def leave(ctx):
 @bot.command(name='play', help='Play music from url')
 async def play(ctx):
     input = ctx.message.content
-    if ctx.channel.id != 884739635543146510 and ctx.channel.id != 884706027818348545:  # this control where to send command message, you can change this
-        return
     url = input.strip('!!play ')
     if not url.startswith("https://www.youtu") and not url.startswith("https://youtu") and not url.startswith("youtu"):
         await search(ctx)
@@ -149,8 +146,6 @@ async def play(ctx):
 
 @bot.command(name='stop', help='Stop player')
 async def stop(ctx):
-    if ctx.channel.id != 884739635543146510 and ctx.channel.id != 884706027818348545:
-        return
     voice = ctx.message.guild.voice_client
     if voice == None:
         await ctx.channel.send("I wasn't in a voice channel")
@@ -165,8 +160,6 @@ async def stop(ctx):
 
 @bot.command(name='skip', help='Skip to next song in queue')
 async def skip(ctx):
-    if ctx.channel.id != 884739635543146510 and ctx.channel.id != 884706027818348545:
-        return
     voice = ctx.message.guild.voice_client
     if queue != []:
         voice.stop()
@@ -179,8 +172,6 @@ async def skip(ctx):
 @bot.command(name='search', help='Search for a song on youtube and get first result add to queue')
 async def search(ctx):
     input = ctx.message.content
-    if ctx.channel.id != 884739635543146510 and ctx.channel.id != 884706027818348545:
-        return
     req = input.strip('!!search ')
     r = requests.get("https://www.youtube.com/results?search_query=" + req)
     s = bs(r.text, "html.parser")
