@@ -10,22 +10,19 @@ from youtube_dl import YoutubeDL as youtubedl
 from bs4 import BeautifulSoup as bs
 from discord.ext import commands
 from discord.utils import get
+from logger import logger
+from update import update
 from dotenv import load_dotenv
-from datetime import datetime
 
-class logger():
-    def __init__(self):
-        log_dir = json.load(open('./config.json'))['log path']
-        self.stdout = sys.stdout
-        self.log = open(log_dir + 'log-' + str(datetime.now().date()) + '.txt', 'w')
-    def flush(self):
-        pass
-    def write(self, text):
-        text = text.rstrip()
-        self.stdout.write('%s %s\n' % (datetime.now().strftime('%H:%M:%S'), text))
-        self.log.write('%s %s\n' % (datetime.now().strftime('%H:%M:%S'), text))
-        return
-
+config = json.load(open('./config.json'))["Log_Path"]
+if os.path.isdir(config["Directory"] + config["ffmpeg"].strip(".")) == True:
+    pass
+else:
+    print("Adding ffmpeg to path...")
+    sys.path.insert(0, config["Directory"] + config["ffmpeg"].strip("."))
+sys.stdout = logger()
+if config["Check_Update_On_Start"] == "True":
+    update()
 load_dotenv()
 TOKEN = os.getenv('BOT_TOKEN')
 GUILD = os.getenv('GUILD')
@@ -38,7 +35,6 @@ banned_words = ['lỏd'] # if you don't need you can delete it
 creator = 853514227738214421
 ydl_opts = {'format': 'bestaudio', 'noplaylist':'True'}
 FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
-sys.stdout = logger()
 
 def get_video_info(url):
     r = requests.get(url)
