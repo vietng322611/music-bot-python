@@ -5,8 +5,8 @@ import urllib
 import os
 
 class update():
-   def __init__(self, config):
-      self.config = config   
+   def __init__(self, f):
+      self.config = f  
       self.release = self.config["Release"].strip("v")
       self.url = "https://api.github.com/repos/vietng322611/music-bot-python/releases/latest"
    def update(self):
