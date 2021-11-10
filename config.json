@@ -3,5 +3,5 @@
   "Check_Update_On_Start": "True",
   "ffmpeg": "./ffmepg/bin",
   "Log_Path": "./logs/",
-  "Release": "v1.2"
+  "Release": "v1.0"
 }
