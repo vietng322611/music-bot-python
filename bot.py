@@ -1,5 +1,5 @@
 # This made by vietng322611, please be respect, don't copy it without permission, you can change the code inside into your code.
-# If there is an error occurred, send me log or try restart the bot.
+# If something goes wrong, send me a log or try restarting the bot.
 
 import os
 import re
