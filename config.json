@@ -1,7 +1,6 @@
 {
   "Check_Update_On_Start": "True",
   "Log_Path": "./logs/",
-  "Release": "v1.4",
-  "BOT_TOKEN": "",
-  "SERVER_NAME": ""
+  "Update_Url": "https://api.github.com/repos/vietng322611/music-bot-python/releases/latest",
+  "Release": "v1.4"
 }
