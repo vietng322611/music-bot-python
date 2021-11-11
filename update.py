@@ -5,6 +5,7 @@ from zipfile import ZipFile
 import time
 import urllib
 import os
+import json
 
 def update(config):
    release = config["Release"].strip("v")
@@ -14,6 +15,7 @@ def update(config):
    if response.status_code != 200:
       print("Can't fetch latest release, abort")
    if float(release) < float(latest_release):
+      config["Release"] = latest_release
       if response.json()["name"].strip(' ' + latest_release) != "Update":
          print(f"New release avalible, you can download it here: {url.replace('api.', '')}")
       else:
@@ -24,6 +26,8 @@ def update(config):
          with ZipFile("bot-project.zip", 'r') as zip:
             zip.extractall("./")
          os.remove("bot-project.zip")
+         with open('config.json', 'w') as fp:
+            json.dump(config, fp)
          print('Update is done')
    else:
       print('Everything is up to date')
