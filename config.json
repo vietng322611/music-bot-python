@@ -2,6 +2,6 @@
   "Check_Update_On_Start": "True",
   "Log_Path": "./logs/",
   "Release": "v1.2",
-  "BOT_TOKEN": "ODgyMjI4ODI4OTQzMDQ4NzU0.YS4Vnw.W3ZlNgMcRwynAFYlqVV70TnLdEU",
-  "SERVER_NAME": "NONSTOP NUT NOVEMBER (NNN)"
+  "BOT_TOKEN": "",
+  "SERVER_NAME": ""
 }
