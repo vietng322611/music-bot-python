@@ -8,7 +8,7 @@ class logger:
     def __init__(self, f):
         self.file = f
         self.log = open(self.file["Log_Path"] + 'log-' + str(datetime.now().date()) + '.txt', 'a')
-        self.log.write('---------------------------------------------')
+        self.log.write('---------------------------------------------\n')
     def flush(self):
         pass
     def write(self, text):      
