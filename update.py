@@ -9,7 +9,7 @@ import json
 
 def update(config):
    release = config["Release"].strip("v")
-   url = "https://api.github.com/repos/vietng322611/music-bot-python/releases/latest"
+   url = config["Update_Url"]
    response = requests.get(url)
    latest_release = response.json()["tag_name"].strip("v")
    if response.status_code != 200:

@@ -8,10 +8,12 @@ class logger:
     def __init__(self, f):
         self.file = f
         self.log = open(self.file["Log_Path"] + 'log-' + str(datetime.now().date()) + '.txt', 'a')
+        self.log.write('---------------------------------------------')
     def flush(self):
         pass
     def write(self, text):      
         text = text.rstrip()
-        stdout.write('%s %s\n' % (datetime.now().strftime('%H:%M:%S'), text))
-        self.log.write('%s %s\n' % (datetime.now().strftime('%H:%M:%S'), text))
+        if text != '':
+           stdout.write('%s\n' % (text))
+           self.log.write('%s\n' % (text))
         return
