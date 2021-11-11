@@ -20,8 +20,8 @@ sys.stdout = logger(config)
 if config["Check_Update_On_Start"] == "True":
     update(config)
 
-TOKEN = config("BOT_TOKEN")
-GUILD = config('GUILD')
+TOKEN = config["BOT_TOKEN"]
+GUILD = config["SERVER_NAME"]
 
 bot = commands.Bot(description="A simple bot made by vietng322611", command_prefix='!!')
 queue = []
