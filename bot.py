@@ -1,7 +1,6 @@
 # This made by vietng322611, please be respect, don't copy it without permission, you can change the code inside into your own.
-# If something goes wrong, send me a log or try restarting the bot.
+# If something goes wrong, send me your log or try restarting the bot.
 
-import os
 import re
 import requests
 import asyncio
@@ -15,15 +14,14 @@ from discord.ext import commands
 from discord.utils import get
 from logger import logger
 from update import update
-from dotenv import load_dotenv
 
 config = json.load(open('./config.json'))
 sys.stdout = logger(config)
 if config["Check_Update_On_Start"] == "True":
     update(config)
-load_dotenv()
-TOKEN = os.getenv('BOT_TOKEN')
-GUILD = os.getenv('GUILD')
+
+TOKEN = config("BOT_TOKEN")
+GUILD = config('GUILD')
 
 bot = commands.Bot(description="A simple bot made by vietng322611", command_prefix='!!')
 queue = []
