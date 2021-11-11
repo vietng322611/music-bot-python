@@ -3,8 +3,5 @@ discord.py
 requests
 json
 youtube_dl
-<<<<<<< HEAD
 pynacl
-=======
-pynacl
->>>>>>> 86f5ecc80d864133a94f0806b2e9617c01992c7c
+
