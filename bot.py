@@ -8,7 +8,7 @@ import asyncio
 import json
 import sys
 
-from discord import FFmpegPCMAudio, user
+from discord import FFmpegPCMAudio
 from youtube_dl import YoutubeDL as youtubedl
 from bs4 import BeautifulSoup as bs
 from discord.ext import commands
