@@ -2,10 +2,11 @@
 # If something goes wrong, send me your log or try restarting the bot.
 
 import re
+import sys
 import requests
 import asyncio
+import os
 import json
-import sys
 
 from discord import FFmpegPCMAudio
 from youtube_dl import YoutubeDL as youtubedl
@@ -14,20 +15,22 @@ from discord.ext import commands
 from discord.utils import get
 from logger import logger
 from update import update
+from dotenv import load_dotenv
 
 config = json.load(open('./config.json'))
 sys.stdout = logger(config)
 if config["Check_Update_On_Start"] == "True":
     update(config)
 
-TOKEN = config["BOT_TOKEN"]
-GUILD = config["SERVER_NAME"]
+load_dotenv()
+TOKEN = os.getenv("BOT_TOKEN")
+GUILD = os.getenv("SERVER_NAME")
 
 bot = commands.Bot(description="A simple bot made by vietng322611", command_prefix='!!')
 queue = []
 queue_info = []
 banned_words_spam = {}
-creator = 0
+creator = 853514227738214421
 banned_words = ['lỏd'] # if you don't need you can delete it
 ydl_opts = {'format': 'bestaudio', 'noplaylist':'True'}
 FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
@@ -58,8 +61,6 @@ async def get_message(ctx):
         parameter = await bot.wait_for("message", timeout=15)
         if parameter.author == bot.user:
             return None
-        if parameter.content.startswith('!!'):
-            return "cancel"
     except asyncio.TimeoutError:
         await ctx.channel.send("Sorry, you didn't reply in time!")
         return "cancel"
@@ -70,6 +71,7 @@ async def get_message(ctx):
             return int(parameter.content)
     except:
         await ctx.message.channel.send('Please enter a number')
+    await bot.process_commands(ctx)
     return None
 
 @bot.event
