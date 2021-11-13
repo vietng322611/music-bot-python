@@ -19,7 +19,6 @@ from dotenv import load_dotenv
 
 config = json.load(open('./config.json'))
 sys.stdout = logger(config)
-sys.path.append(config["Directory"] + config["ffmpeg"].strip('.'))
 if config["Check_Update_On_Start"] == "True":
     update(config)
 
