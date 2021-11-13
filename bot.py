@@ -19,6 +19,7 @@ from dotenv import load_dotenv
 
 config = json.load(open('./config.json'))
 sys.stdout = logger(config)
+sys.path.append(config["Directory"] + config["ffmpeg"].strip('.'))
 if config["Check_Update_On_Start"] == "True":
     update(config)
 
@@ -120,6 +121,9 @@ async def leave(ctx):
 @bot.command(name='play', help='Play music from url or search for music')
 async def play(ctx):
     input = ctx.message.content
+    if input == '!!play':
+        if queue != []:
+            await playing(ctx, ctx.message.guild.voice_client)
     url = input.strip('!!play ')
     if not url.startswith("https://www.youtu") and not url.startswith("https://youtu") and not url.startswith("youtu"):
         await search(ctx)
@@ -132,12 +136,11 @@ async def play(ctx):
         return
     channel = status.channel
     voice = ctx.message.guild.voice_client
-    try:
-        await channel.connect()
-    except Exception:
+    if voice != None:
         if voice != channel:
             await voice.move_to(channel)
-    voice =  ctx.message.guild.voice_client
+    else:
+        voice = await channel.connect()
     if not voice.is_playing():
         await playing(ctx, voice)
     else:
