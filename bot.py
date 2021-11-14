@@ -49,7 +49,7 @@ async def playing(ctx, voice):
         if not voice.is_playing():
             loop = asyncio.get_event_loop()
             voice.play(FFmpegPCMAudio(url, **FFMPEG_OPTIONS), after=lambda x=None: loop.create_task(playing(ctx, voice)))
-            voice.source = PCMVolumeTransformer(voice.source, volume=50.0)
+            voice.source = PCMVolumeTransformer(voice.source, volume=1.0)
             await ctx.send(f'**Now Playing:** `{title}`')
     return
 
@@ -64,7 +64,7 @@ async def get_message(ctx):
         return "cancel"
     if parameter.content == "cancel":
         return parameter.content
-    elif parameter.isnumeric() == True:
+    elif parameter.content.isnumeric() == True:
         return int(parameter.content)
     else:
         await ctx.message.channel.send('Please enter a number')
@@ -119,10 +119,10 @@ async def volume(ctx):
         await ctx.message.channel.send('Please enter a number from 0 to 200')
         return
     input = float(input)
-    if input < 0 or input > 100:
+    if input < 0 or input > 200:
         await ctx.message.channel.send('Please enter a number from 0 to 200')
         return
-    volume = input/10
+    volume = input / 100
     voice.source.volume = volume
     return await ctx.message.channel.send(f'**Volume changed to** {input}/200')
 
