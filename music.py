@@ -16,7 +16,7 @@ class music(commands.Cog):
         self.queue = []
         self.queue_info = []
     
-    def get_video_info(url):
+    def get_video_info(self, url):
         r = requests.get(url)
         s = bs(r.text, "html.parser")
         title = s.find('title').get_text().replace(' - YouTube', '')
@@ -39,6 +39,23 @@ class music(commands.Cog):
                 voice.source = PCMVolumeTransformer(voice.source, volume=1.0)
                 await ctx.send(f'**Now Playing:** `{title}`')
         return
+
+    async def get_message(self, ctx):
+        try:
+            parameter = await self.bot.wait_for("message", timeout=15)
+            if parameter.author == self.bot.user:
+                return None
+        except asyncio.TimeoutError:
+            await ctx.channel.send("Sorry, you didn't reply in time!")
+            return "cancel"
+        if parameter.content == "cancel":
+            return parameter.content
+        elif parameter.content.isnumeric() == True:
+            return int(parameter.content)
+        else:
+            await ctx.message.channel.send('Please enter a number')
+        await commands.Cog.process_commands(ctx)
+        return None
 
     @commands.command(name='play', help='Play song from url')
     async def play(self, ctx):
