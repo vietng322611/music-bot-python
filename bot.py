@@ -31,24 +31,6 @@ creator = 853514227738214421
 banned_words = ['lỏd'] # if you don't need you can delete it
 
 @bot.event
-async def get_message(ctx):
-    try:
-        parameter = await bot.wait_for("message", timeout=15)
-        if parameter.author == bot.user:
-            return None
-    except asyncio.TimeoutError:
-        await ctx.channel.send("Sorry, you didn't reply in time!")
-        return "cancel"
-    if parameter.content == "cancel":
-        return parameter.content
-    elif parameter.content.isnumeric() == True:
-        return int(parameter.content)
-    else:
-        await ctx.message.channel.send('Please enter a number')
-    await bot.process_commands(ctx)
-    return None
-
-@bot.event
 async def on_ready():
     print(f'Connected')
 
