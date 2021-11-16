@@ -29,16 +29,15 @@ class music(commands.Cog):
             title = info['title'] 
         return url2, title
 
-    async def playing(self, ctx):
-        voice = ctx.voice_client
+    async def playing(self, ctx, voice):
         if self.queue != []:
             url = self.queue.pop(0)
             title = self.queue_info.pop(0)
-            if not voice.is_playing():
-                loop = asyncio.get_event_loop()
-                voice.play(FFmpegPCMAudio(url, **self.FFMPEG_OPTIONS), after=lambda x=None: loop.create_task(self.playing(ctx, voice)))
-                voice.source = PCMVolumeTransformer(voice.source, volume=1.0)
-                await ctx.send(f'**Now Playing:** `{title}`')
+        if not voice.is_playing():
+            loop = asyncio.get_event_loop()
+            voice.play(FFmpegPCMAudio(url, **self.FFMPEG_OPTIONS), after=lambda x=None: loop.create_task(self.playing(ctx, voice)))
+            voice.source = PCMVolumeTransformer(voice.source, volume=1.0)
+            await ctx.send(f'**Now Playing:** `{title}`')
         return
 
     async def get_message(self, ctx):
@@ -69,10 +68,10 @@ class music(commands.Cog):
         if input == '!!play':
             if self.queue != []:
                 if voice != None:
-                    await self.playing(ctx)
+                    await self.playing(ctx, voice)
                 else:
                     voice = await status.channel.connect()
-                    await self.playing(ctx)
+                    await self.playing(ctx, voice)
                 return
         url = input.strip('!!play ')
         if not url.startswith("https://www.youtu") and not url.startswith("https://youtu") and not url.startswith("youtu"):
@@ -86,9 +85,9 @@ class music(commands.Cog):
             if voice != channel:
                 voice = await voice.move_to(channel)
         else:
-            voice = await channel.connect()
+            voice = await channel.connect(reconnect=True)
         if not voice.is_playing():
-            await self.playing(ctx)
+            await self.playing(ctx, voice)
         else:
             await ctx.message.channel.send('Added to queue')
         return
@@ -122,12 +121,12 @@ class music(commands.Cog):
                 return
             channel = status.channel
             if voice == None:
-                voice = await channel.connect()
+                voice = await channel.connect(reconnect=True)
             else:
                 if voice != channel:
                     voice = await voice.move_to(channel)
         if not voice.is_playing():
-            await self.playing(ctx)
+            await self.playing(ctx, voice)
         return
     
     @commands.command(name='skip', help='Skip to next song in queue')
@@ -137,7 +136,7 @@ class music(commands.Cog):
             await ctx.message.channel.send("I'm not playing anything")
         elif self.queue != []:
             voice.stop()
-            await self.playing(ctx)
+            await self.playing(ctx, voice)
             return
         else:
             await ctx.message.channel.send('No song left')
