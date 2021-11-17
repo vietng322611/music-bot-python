@@ -12,7 +12,6 @@ class music(commands.Cog):
         self.bot = bot
         self.voice = None
         self.ydl_opts = {'format': 'bestaudio', 'noplaylist':'True'}
-        self.FFMPEG_OPTIONS = {'options': '-vn'}
         self.queue = []
         self.queue_info = []
     
@@ -35,7 +34,7 @@ class music(commands.Cog):
             title = self.queue_info.pop(0)
         if not voice.is_playing():
             loop = asyncio.get_event_loop()
-            voice.play(FFmpegPCMAudio(url, **self.FFMPEG_OPTIONS), after=lambda x=None: loop.create_task(self.playing(ctx, voice)))
+            voice.play(FFmpegPCMAudio(url), after=lambda x=None: loop.create_task(self.playing(ctx, voice)))
             voice.source = PCMVolumeTransformer(voice.source, volume=1.0)
             await ctx.send(f'**Now Playing:** `{title}`')
         return
