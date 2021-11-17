@@ -75,7 +75,7 @@ async def volume(ctx):
         await ctx.message.channel.send("I'm not playing anything")
         return
     try:
-        input = float(round(input))
+        input = float(input)
     except ValueError:
         await ctx.message.channel.send('Please enter a number from 0 to 200')
         return
@@ -84,7 +84,7 @@ async def volume(ctx):
         return
     volume = input / 100
     voice.source.volume = volume
-    return await ctx.message.channel.send(f'**Volume changed to** {round(input)}/200')
+    return await ctx.message.channel.send(f'**Volume changed to** {int(input)}/200')
 
 @bot.command(name='leave', help='Leave voice channel')
 async def leave(ctx):
