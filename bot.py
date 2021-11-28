@@ -2,7 +2,6 @@
 # If something goes wrong, send me your log or try restarting the bot.
 
 import sys
-import asyncio
 import os
 import json
 
