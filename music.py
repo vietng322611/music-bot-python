@@ -14,7 +14,6 @@ class music(commands.Cog):
         self.ydl_opts = {'format': 'bestaudio', 'noplaylist':'True'}
         self.queue = []
         self.queue_info = []
-    
     def get_video_info(self, url):
         r = requests.get(url)
         s = bs(r.text, "html.parser")
@@ -30,16 +29,16 @@ class music(commands.Cog):
 
     async def playing(self, ctx, voice):
         if self.queue != []:
-            url = self.queue.pop(0)
+            player = self.queue.pop(0)
             title = self.queue_info.pop(0)
-        if not voice.is_playing():
-            loop = asyncio.get_event_loop()
-            voice.play(FFmpegPCMAudio(url), after=lambda x=None: loop.create_task(self.playing(ctx, voice)))
-            voice.source = PCMVolumeTransformer(voice.source, volume=1.0)
-            await ctx.send(f'**Now Playing:** `{title}`')
+            if not voice.is_playing():
+                loop = asyncio.get_event_loop()
+                voice.play(FFmpegPCMAudio(player), after=lambda x=None: loop.create_task(self.playing(ctx, voice)))
+                voice.source = PCMVolumeTransformer(voice.source, volume=1.0)
+                await ctx.send(f'**Now Playing:** `{title}`')
         return
 
-    async def get_message(self, ctx):
+    async def get_message(self, ctx, user):
         try:
             parameter = await self.bot.wait_for("message", timeout=15)
             if parameter.author == self.bot.user:
@@ -47,7 +46,9 @@ class music(commands.Cog):
         except asyncio.TimeoutError:
             await ctx.channel.send("Sorry, you didn't reply in time!")
             return "cancel"
-        if parameter.content == "cancel":
+        if parameter.author != user:
+            return None 
+        elif parameter.content == "cancel":
             return parameter.content
         elif parameter.content.isnumeric() == True:
             return int(parameter.content)
@@ -59,7 +60,7 @@ class music(commands.Cog):
     @commands.command(name='play', help='Play song from url')
     async def play(self, ctx):
         input = ctx.message.content
-        voice = ctx.voice_client  
+        voice = ctx.voice_client
         status = ctx.author.voice
         if status == None:
             await ctx.message.channel.send('Please join a voice channel')
@@ -84,7 +85,7 @@ class music(commands.Cog):
             if voice != channel:
                 voice = await voice.move_to(channel)
         else:
-            voice = await channel.connect(reconnect=True)
+            voice = await channel.connect()
         if not voice.is_playing():
             await self.playing(ctx, voice)
         else:
@@ -105,7 +106,7 @@ class music(commands.Cog):
         await ctx.message.channel.send('Please choose a song')
         parameter = None
         while parameter == None:
-            parameter = await self.get_message(ctx)
+            parameter = await self.get_message(ctx, ctx.message.author)
         if parameter == "cancel":
             return await ctx.message.channel.send('Canceled')
         url = 'https://www.youtube.com/watch?v=' + ids[parameter]
@@ -113,7 +114,7 @@ class music(commands.Cog):
         self.queue.append(url2)
         self.queue_info.append(title)
         await ctx.message.channel.send('I added this to queue: {}'.format(url))
-        voice = ctx.voice_client 
+        voice = ctx.guild.voice_client 
         if voice == None:
             status = ctx.author.voice
             if status == None:
@@ -130,7 +131,7 @@ class music(commands.Cog):
     
     @commands.command(name='skip', help='Skip to next song in queue')
     async def skip(self, ctx):
-        voice = ctx.voice_client 
+        voice = ctx.guild.voice_client 
         if voice == None:
             await ctx.message.channel.send("I'm not playing anything")
         elif self.queue != []:
