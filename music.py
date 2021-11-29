@@ -13,7 +13,6 @@ class music(commands.Cog):
         self.ydl_opts = {'format': 'bestaudio', 'noplaylist':'True'}
         self.queue = []
         self.queue_info = []
-        self.current_voice_channel = None
     def get_video_info(self, url):
         r = requests.get(url)
         s = bs(r.text, "html.parser")
@@ -34,8 +33,6 @@ class music(commands.Cog):
         return res
 
     async def playing(self, ctx, voice):
-        if not voice.is_connected():
-            self.current_voice_channel.connect()
         if not voice.is_playing():
             if self.queue != []:
                 player = self.queue.pop(0)
@@ -166,10 +163,10 @@ class music(commands.Cog):
         channel = status.channel
         if voice != None:
             if voice != channel:
-                voice = await voice.move_to(channel)
+                await voice.move_to(channel)
         else:
-            voice = await channel.connect(reconnect=True)
-        self.current_voice_channel = voice
+            await channel.connect(reconnect=True)
+        voice = ctx.voice_client
         await self.playing(ctx, voice)
         return
 
@@ -200,11 +197,11 @@ class music(commands.Cog):
                 return
             channel = status.channel
             if voice == None:
-                voice = await channel.connect(reconnect=True)
+                await channel.connect(reconnect=True)
             else:
                 if voice != channel:
-                    voice = await voice.move_to(channel)
-        self.current_voice_channel = voice
+                    await voice.move_to(channel)
+        voice = ctx.voice_client
         if not voice.is_playing():
             await self.playing(ctx, voice)
         return
@@ -212,7 +209,6 @@ class music(commands.Cog):
     @commands.command(name='skip', help='Skip to next song in queue')
     async def skip(self, ctx):
         voice = ctx.guild.voice_client
-        self.current_voice_channel = voice
         if voice == None:
             await ctx.message.channel.send("I'm not playing anything")
         elif self.queue != []:
