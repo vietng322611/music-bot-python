@@ -13,6 +13,7 @@ class music(commands.Cog):
         self.ydl_opts = {'format': 'bestaudio', 'noplaylist':'True'}
         self.queue = []
         self.queue_info = []
+        self.loop = asyncio.get_event_loop()
     def get_video_info(self, url):
         r = requests.get(url)
         s = bs(r.text, "html.parser")
@@ -37,8 +38,10 @@ class music(commands.Cog):
             if self.queue != []:
                 player = self.queue.pop(0)
                 title = self.queue_info.pop(0)
-                loop = asyncio.get_event_loop()
-                voice.play(FFmpegPCMAudio(player), after=lambda x=None: loop.create_task(self.playing(ctx, voice)))
+                try:
+                    voice.play(FFmpegPCMAudio(player), after=lambda x=None: asyncio.new_event_loop().create_task(self.playing(ctx, voice)))
+                except:
+                    pass
                 voice.source = PCMVolumeTransformer(voice.source, volume=1.0)
                 await ctx.send(f'**Now Playing:** `{title}`')
         else:
@@ -64,96 +67,24 @@ class music(commands.Cog):
         await commands.Cog.process_commands(ctx)
         return None
 
-    @commands.command(name='vol', help='Change commands volume')
-    async def volume(ctx):
-        input = ctx.message.content.strip('!!vol ')
-        voice = ctx.voice_client
-        status = ctx.author.voice
-        if status == None:
-            await ctx.message.channel.send('Please join a voice channel and play something')
-            return
-        elif voice == None:
-            await ctx.message.channel.send("I'm not playing anything")
-            return
-        try:
-            input = float(input)
-        except ValueError:
-            await ctx.message.channel.send('Please enter a number from 0 to 200')
-            return
-        if input < 0 or input > 200:
-            await ctx.message.channel.send('Please enter a number from 0 to 200')
-            return
-        volume = input / 100
-        voice.source.volume = volume
-        return await ctx.message.channel.send(f'**Volume changed to** {int(input)}/200')
-
-    @commands.command(name='leave', help='Leave voice channel')
-    async def leave(self, ctx):
-        voice = ctx.voice_client
-        if voice != None:
-            if voice.is_playing:
-                voice.stop()
-                return await voice.disconnect()
-        else:
-            return await ctx.message.channel.send("I'm not in a voice channel now" )
-
-    @commands.command(name='stop', help='Stop bot playing songs')
-    async def stop(self, ctx):
-        voice = ctx.voice_client 
-        if voice == None:
-            await ctx.channel.send("I'm not playing anything")
-            return 
-        if self.queue == []:
-            voice.stop()
-            await voice.disconnect()
-        else:
-            voice.stop()
-        await ctx.message.channel.send('Stopped')
-        return
-
-    @commands.command(name='delete', help='Delete a song from queue')
-    async def delete(self, ctx):
-        input = ctx.message.content
-        pos = input.strip('!!delete ')
-        try:
-            pos = int(pos)
-        except:
-            await ctx.message.channel.send('Please enter a number')
-        try:
-            self.queue.pop(pos)
-            self.queue_info.pop(pos)
-            await ctx.message.channel.send('Deleted from queue')
-        except:
-            await ctx.message.channel.send('Out of range')
-        return
-    @commands.command(name='show-queue', help='Show current songs in queue')
-    async def show_queue(self, ctx):
-        if len(self.queue) == 0:
-            await ctx.message.channel.send('No song left')
-            return
-        count = 0
-        list_queue = ''
-        for i in self.queue_info:
-            list_queue += f'{count}:{i}\n'
-            count += 1
-        return await ctx.message.channel.send(list_queue)
-
     @commands.command(name='play', help='Play song from url')
     async def play(self, ctx):
         input = ctx.message.content
         voice = ctx.voice_client
         status = ctx.author.voice
         if status == None:
-            await ctx.message.channel.send('Please join a voice channel')
-            return
+            return await ctx.message.channel.send('Please join a voice channel')
         if input == '!!play':
             if self.queue != []:
                 if voice != None:
                     await self.playing(ctx, voice)
                 else:
-                    voice = await status.channel.connect()
+                    await status.channel.connect()
+                    voice = ctx.voice_client
                     await self.playing(ctx, voice)
-                return
+            else:
+                await ctx.message.channel.send('Usage: !!play [your input]')
+            return
         url = input.strip('!!play ')
         if not url.startswith("https://www.youtu") and not url.startswith("https://youtu") and not url.startswith("youtu"):
             url = 'https://www.youtube.com/watch?v=' + self.request(url)[0]
@@ -169,6 +100,17 @@ class music(commands.Cog):
         voice = ctx.voice_client
         await self.playing(ctx, voice)
         return
+    
+    @commands.command(name='stop', help='Stop bot playing songs')
+    async def stop(self, ctx):
+        voice = ctx.voice_client 
+        if voice == None:
+            await ctx.channel.send("I'm not playing anything")
+            return 
+        else:
+            voice.stop()
+            await voice.disconnect()
+        return await ctx.message.channel.send('Stopped')
 
     @commands.command(name='search', help='Search for a song on youtube')
     async def search(self, ctx):
@@ -218,3 +160,64 @@ class music(commands.Cog):
         else:
             await ctx.message.channel.send('No song left')
         return
+
+    @commands.command(name='vol', help='Change commands volume')
+    async def volume(ctx):
+        input = ctx.message.content.strip('!!vol ')
+        voice = ctx.voice_client
+        status = ctx.author.voice
+        if status == None:
+            await ctx.message.channel.send('Please join a voice channel and play something')
+            return
+        elif voice == None:
+            await ctx.message.channel.send("I'm not playing anything")
+            return
+        try:
+            input = float(input)
+        except ValueError:
+            await ctx.message.channel.send('Please enter a number from 0 to 200')
+            return
+        if input < 0 or input > 200:
+            await ctx.message.channel.send('Please enter a number from 0 to 200')
+            return
+        volume = input / 100
+        voice.source.volume = volume
+        return await ctx.message.channel.send(f'**Volume changed to** {int(input)}/200')
+
+    @commands.command(name='leave', help='Leave voice channel')
+    async def leave(self, ctx):
+        voice = ctx.voice_client
+        if voice != None:
+            if voice.is_playing:
+                voice.stop()
+                return await voice.disconnect()
+        else:
+            return await ctx.message.channel.send("I'm not in a voice channel now" )
+
+    @commands.command(name='delete', help='Delete a song from queue')
+    async def delete(self, ctx):
+        input = ctx.message.content
+        pos = input.strip('!!delete ')
+        try:
+            pos = int(pos)
+        except:
+            await ctx.message.channel.send('Please enter a number')
+        try:
+            self.queue.pop(pos)
+            self.queue_info.pop(pos)
+            await ctx.message.channel.send('Deleted from queue')
+        except:
+            await ctx.message.channel.send('Out of range')
+        return
+
+    @commands.command(name='show-queue', help='Show current songs in queue')
+    async def show_queue(self, ctx):
+        if len(self.queue) == 0:
+            await ctx.message.channel.send('No song left')
+            return
+        count = 0
+        list_queue = ''
+        for i in self.queue_info:
+            list_queue += f'{count}:{i}\n'
+            count += 1
+        return await ctx.message.channel.send(list_queue)
