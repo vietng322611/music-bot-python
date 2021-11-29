@@ -36,14 +36,16 @@ class music(commands.Cog):
     async def playing(self, ctx, voice):
         if not voice.is_connected():
             self.current_voice_channel.connect()
-        if self.queue != []:
-            player = self.queue.pop(0)
-            title = self.queue_info.pop(0)
-            if not voice.is_playing():
+        if not voice.is_playing():
+            if self.queue != []:
+                player = self.queue.pop(0)
+                title = self.queue_info.pop(0)
                 loop = asyncio.get_event_loop()
                 voice.play(FFmpegPCMAudio(player), after=lambda x=None: loop.create_task(self.playing(ctx, voice)))
                 voice.source = PCMVolumeTransformer(voice.source, volume=1.0)
                 await ctx.send(f'**Now Playing:** `{title}`')
+        else:
+            await ctx.message.channel.send('Added to queue')
         return
 
     async def get_message(self, ctx, user):
@@ -64,7 +66,7 @@ class music(commands.Cog):
             await ctx.message.channel.send('Please enter a number')
         await commands.Cog.process_commands(ctx)
         return None
-        
+
     @commands.command(name='vol', help='Change commands volume')
     async def volume(ctx):
         input = ctx.message.content.strip('!!vol ')
@@ -168,10 +170,7 @@ class music(commands.Cog):
         else:
             voice = await channel.connect(reconnect=True)
         self.current_voice_channel = voice
-        if not voice.is_playing():
-            await self.playing(ctx, voice)
-        else:
-            await ctx.message.channel.send('Added to queue')
+        await self.playing(ctx, voice)
         return
 
     @commands.command(name='search', help='Search for a song on youtube')
