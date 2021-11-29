@@ -6,7 +6,7 @@ from sys import stdout
 class logger:
     def __init__(self, f):
         self.file = f
-        self.log = open(self.file["Log_Path"] + 'log-' + str(datetime.now().date()) + '.txt', 'a')
+        self.log = open(self.file["Log_Path"] + 'log-' + str(datetime.now().date()) + '@' + str(datetime.now().strftime('%H.%M.%S')) + '.txt', 'w')
         self.log.write('============================================\n')
     def flush(self):
         pass
