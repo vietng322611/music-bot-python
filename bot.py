@@ -7,6 +7,8 @@ import json
 
 from discord.ext import commands
 from discord.utils import get
+from discord.embeds import Embed
+from discord.colour import Color
 from logger import logger
 from update import update
 from dotenv import load_dotenv
@@ -64,6 +66,8 @@ async def on_message(message):
 
 @bot.command(name='show-banned-words', help='Show a list of banned words')
 async def show_banned_words(ctx):
-    return await ctx.message.send(f'**Banned words :**{banned_words}')
+    embed = Embed(color = Color.from_rgb(255, 0, 0))
+    embed.add_field(name="Banned words", value=banned_words, inline=False)
+    return await ctx.message.send(embed=embed)
 
 bot.run(TOKEN)
