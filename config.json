@@ -2,5 +2,5 @@
   "Check_Update_On_Start": "True",
   "Log_Path": "./logs/",
   "Update_Url": "https://api.github.com/repos/vietng322611/music-bot-python/releases/latest",
-  "Release": "v2.2"
+  "Release": "v2.3"
 }
