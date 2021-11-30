@@ -21,7 +21,6 @@ if config["Check_Update_On_Start"] == "True":
 
 load_dotenv()
 TOKEN = os.getenv("BOT_TOKEN")
-GUILD = os.getenv("SERVER_NAME")
 
 bot = commands.Bot(description="A simple bot made by vietng322611", command_prefix='!!')
 bot.add_cog(music(bot))
