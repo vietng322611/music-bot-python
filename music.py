@@ -1,4 +1,6 @@
 from discord import FFmpegPCMAudio, PCMVolumeTransformer
+from discord.embeds import Embed
+from discord.colour import Color
 from discord.ext import commands
 from youtube_dl import YoutubeDL as youtubedl
 from bs4 import BeautifulSoup as bs
@@ -13,7 +15,9 @@ class music(commands.Cog):
         self.ydl_opts = {'format': 'bestaudio', 'noplaylist':'True'}
         self.queue = []
         self.queue_info = []
-        self.loop = asyncio.get_event_loop()
+        self.users = []
+        self.avatar_urls = []
+        self.embed = Embed(color = Color.from_rgb(255, 0, 0))
     def get_video_info(self, url):
         r = requests.get(url)
         s = bs(r.text, "html.parser")
@@ -38,12 +42,14 @@ class music(commands.Cog):
             if self.queue != []:
                 player = self.queue.pop(0)
                 title = self.queue_info.pop(0)
-                try:
-                    voice.play(FFmpegPCMAudio(player), after=lambda x=None: asyncio.new_event_loop().create_task(self.playing(ctx, voice)))
-                except:
-                    pass
+                user = self.users.pop(0)
+                avatar = self.avatar_urls.pop(0)
+                embed = self.embed
+                embed.add_field(name="Currently Playing", value=title, inline=False)
+                embed.set_footer(text=f"Requested by {user}", icon_url=avatar)
+                voice.play(FFmpegPCMAudio(player), after=lambda x=None: asyncio.new_event_loop().create_task(self.playing(ctx, voice)))
                 voice.source = PCMVolumeTransformer(voice.source, volume=1.0)
-                await ctx.send(f'**Now Playing:** `{title}`')
+                await ctx.send(embed=embed)
         else:
             await ctx.message.channel.send('Added to queue')
         return
@@ -91,6 +97,8 @@ class music(commands.Cog):
         url2, title = self.ytdl(url)
         self.queue.append(url2)
         self.queue_info.append(title)
+        self.users.append(ctx.author.name)
+        self.avatar_urls.append(ctx.author.avatar_url)
         channel = status.channel
         if voice != None:
             if voice != channel:
@@ -131,7 +139,12 @@ class music(commands.Cog):
         url2, title = self.ytdl(url)
         self.queue.append(url2)
         self.queue_info.append(title)
-        await ctx.message.channel.send('I added this to queue: {}'.format(url))
+        self.users.append(ctx.author.name)
+        self.avatar_urls.append(ctx.author.avatar_url)
+        embed = self.embed
+        embed.add_field(name="Currently Playing", value=title, inline=False)
+        embed.set_footer(text=f"Requested by {ctx.author.name}", icon_url=ctx.author.avatar_url)
+        await ctx.message.channel.send('I have added this to queue: {}'.format(url))
         voice = ctx.guild.voice_client 
         if voice == None:
             status = ctx.author.voice
@@ -218,6 +231,8 @@ class music(commands.Cog):
         count = 0
         list_queue = ''
         for i in self.queue_info:
-            list_queue += f'{count}:{i}\n'
+            list_queue += f'{count}: {i}\n'
             count += 1
-        return await ctx.message.channel.send(list_queue)
+        embed = self.embed
+        embed.add_field(name="Queued songs", value=list_queue, inline=False)
+        return await ctx.message.channel.send(embed=embed)
