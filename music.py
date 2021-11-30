@@ -12,12 +12,14 @@ import re
 class music(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.ydl_opts = {'format': 'bestaudio', 'noplaylist':'True'}
+        self.ydl_opts = {'format': 'bestaudio/best', 'noplaylist':'True'}
+        self.FFMPEG_OPTS = {'options': '-timeout 1000 -vn'}
         self.queue = []
         self.queue_info = []
         self.users = []
         self.avatar_urls = []
-        self.embed = Embed(color = Color.from_rgb(255, 0, 0))
+        self.current_song = ""
+
     def get_video_info(self, url):
         r = requests.get(url)
         s = bs(r.text, "html.parser")
@@ -42,12 +44,13 @@ class music(commands.Cog):
             if self.queue != []:
                 player = self.queue.pop(0)
                 title = self.queue_info.pop(0)
+                self.current_song = title
                 user = self.users.pop(0)
                 avatar = self.avatar_urls.pop(0)
-                embed = self.embed
-                embed.add_field(name="Currently Playing", value=title, inline=False)
+                embed = Embed(color = Color.from_rgb(255, 0, 0))
+                embed.add_field(name="Now Playing", value=title, inline=False)
                 embed.set_footer(text=f"Requested by {user}", icon_url=avatar)
-                voice.play(FFmpegPCMAudio(player), after=lambda x=None: asyncio.new_event_loop().create_task(self.playing(ctx, voice)))
+                voice.play(FFmpegPCMAudio(player, **self.FFMPEG_OPTS), after=lambda x=None: asyncio.new_event_loop().create_task(self.playing(ctx, voice)))
                 voice.source = PCMVolumeTransformer(voice.source, volume=1.0)
                 await ctx.send(embed=embed)
         else:
@@ -128,7 +131,9 @@ class music(commands.Cog):
         urls = ''
         for i in range(5):
             urls += str(i) + ':' + self.get_video_info('https://www.youtube.com/watch?v=' + res[i]) + '\n'
-        await ctx.message.channel.send('`{}`'.format(urls))
+        embed = Embed(color = Color.from_rgb(255, 0, 0))
+        embed.add_field(name=f'Result for "{req}"', value=urls, inline=False)
+        await ctx.message.channel.send(embed=embed)
         await ctx.message.channel.send('Please choose a song')
         parameter = None
         while parameter == None:
@@ -141,10 +146,10 @@ class music(commands.Cog):
         self.queue_info.append(title)
         self.users.append(ctx.author.name)
         self.avatar_urls.append(ctx.author.avatar_url)
-        embed = self.embed
-        embed.add_field(name="Currently Playing", value=title, inline=False)
+        embed = Embed(color = Color.from_rgb(255, 0, 0))
+        embed.add_field(name="Added", value=url2, inline=False)
         embed.set_footer(text=f"Requested by {ctx.author.name}", icon_url=ctx.author.avatar_url)
-        await ctx.message.channel.send('I have added this to queue: {}'.format(url))
+        await ctx.message.channel.send(embed=embed)
         voice = ctx.guild.voice_client 
         if voice == None:
             status = ctx.author.voice
@@ -175,7 +180,7 @@ class music(commands.Cog):
         return
 
     @commands.command(name='vol', help='Change commands volume')
-    async def volume(ctx):
+    async def volume(self, ctx):
         input = ctx.message.content.strip('!!vol ')
         voice = ctx.voice_client
         status = ctx.author.voice
@@ -223,16 +228,21 @@ class music(commands.Cog):
             await ctx.message.channel.send('Out of range')
         return
 
-    @commands.command(name='show-queue', help='Show current songs in queue')
+    @commands.command(name='queue', help='Show current songs in queue')
     async def show_queue(self, ctx):
+        embed = Embed(color = Color.from_rgb(255, 0, 0))
+        embed.add_field(name="Currently Playing", value=self.current_song, inline=False)
         if len(self.queue) == 0:
-            await ctx.message.channel.send('No song left')
+            voice = ctx.voice_client
+            if voice.is_playing:
+                await ctx.message.channel.send(embed=embed)
+            elif voice == None:
+                await ctx.message.channel.send('No song left')
             return
         count = 0
         list_queue = ''
         for i in self.queue_info:
             list_queue += f'{count}: {i}\n'
             count += 1
-        embed = self.embed
         embed.add_field(name="Queued songs", value=list_queue, inline=False)
         return await ctx.message.channel.send(embed=embed)

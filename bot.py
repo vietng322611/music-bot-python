@@ -42,6 +42,10 @@ async def add_role(message):
     return await member.add_roles(role)
 
 @bot.event
+async def on_command_error():
+    return
+
+@bot.event
 async def on_message(message):
     inp = message.content
     if message.author == bot.user:
