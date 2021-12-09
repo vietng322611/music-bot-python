@@ -22,7 +22,7 @@ if config["Check_Update_On_Start"] == "True":
 load_dotenv()
 TOKEN = os.getenv("BOT_TOKEN")
 
-bot = commands.Bot(description="A simple bot made by vietng322611", command_prefix='!!')
+bot = commands.Bot(description="A simple bot made by vietng322611", command_prefix=config["Prefix"])
 bot.add_cog(music(bot))
 queue = []
 queue_info = []
