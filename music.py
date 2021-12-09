@@ -12,13 +12,13 @@ import re
 class music(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.ydl_opts = {'format': 'bestaudio/best', 'noplaylist':'True'}
+        self.ydl_opts = {'format': 'bestaudio', 'noplaylist':'True'}
         self.FFMPEG_OPTS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5','options': '-vn'}
         self.queue = []
-        self.queue_info = []
+        self.urls = []
+        self.titles = []
         self.users = []
         self.avatar_urls = []
-        self.loop = asyncio.new_event_loop()
         self.current_song = ""
 
     def get_video_info(self, url):
@@ -41,21 +41,21 @@ class music(commands.Cog):
         return res
 
     async def playing(self, ctx, voice):
+        
         if not voice.is_playing():
             if self.queue != []:
                 player = self.queue.pop(0)
-                title = self.queue_info.pop(0)
-                self.current_song = title
+                self.titles.pop(0)
+                url = self.urls.pop(0)
+                self.current_song = url
                 user = self.users.pop(0)
                 avatar = self.avatar_urls.pop(0)
                 embed = Embed(color = Color.from_rgb(255, 0, 0))
-                embed.add_field(name="Now Playing", value=title, inline=False)
+                embed.add_field(name="Now Playing", value=url, inline=False)
                 embed.set_footer(text=f"Requested by {user}", icon_url=avatar)
-                voice.play(FFmpegPCMAudio(player, **self.FFMPEG_OPTS), after=lambda x=None: self.loop.create_task(self.playing(ctx, voice)))
+                voice.play(FFmpegPCMAudio(player, **self.FFMPEG_OPTS), after=lambda x=None: self.playing(ctx, voice))
                 voice.source = PCMVolumeTransformer(voice.source, volume=1.0)
                 await ctx.send(embed=embed)
-        else:
-            await ctx.message.channel.send('Added to queue')
         return
 
     async def get_message(self, ctx, user):
@@ -100,7 +100,8 @@ class music(commands.Cog):
             url = 'https://www.youtube.com/watch?v=' + self.request(url)[0]
         url2, title = self.ytdl(url)
         self.queue.append(url2)
-        self.queue_info.append(title)
+        self.titles.append(title)
+        self.urls.append(url)
         self.users.append(ctx.author.name)
         self.avatar_urls.append(ctx.author.avatar_url)
         channel = status.channel
@@ -110,7 +111,13 @@ class music(commands.Cog):
         else:
             await channel.connect()
         voice = ctx.voice_client
-        await self.playing(ctx, voice)
+        if not voice.is_playing():
+            await self.playing(ctx, voice)
+        else:
+            embed = Embed(color = Color.from_rgb(255, 0, 0))
+            embed.add_field(name="Added to queue", value=url, inline=False)
+            embed.set_footer(text=f"Requested by {ctx.author.name}", icon_url=ctx.author.avatar_url)
+            await ctx.message.channel.send('Added to queue')
         return
     
     @commands.command(name='stop', aliases=['s'],help='Stop bot playing songs')
@@ -144,7 +151,8 @@ class music(commands.Cog):
         url = 'https://www.youtube.com/watch?v=' + res[parameter]
         url2, title = self.ytdl(url)
         self.queue.append(url2)
-        self.queue_info.append(title)
+        self.titles.append(title)
+        self.urls.append(url)
         self.users.append(ctx.author.name)
         self.avatar_urls.append(ctx.author.avatar_url)
         embed = Embed(color = Color.from_rgb(255, 0, 0))
@@ -217,13 +225,15 @@ class music(commands.Cog):
     async def delete(self, ctx):
         input = ctx.message.content
         pos = input.strip('!!delete ')
-        try:
+        if pos.isalnum:
             pos = int(pos)
-        except:
+        else:
             await ctx.message.channel.send('Please enter a number')
+            return
         try:
             self.queue.pop(pos)
-            self.queue_info.pop(pos)
+            self.urls.pop(pos)
+            self.titles.pop(pos)
             await ctx.message.channel.send('Deleted from queue')
         except:
             await ctx.message.channel.send('Out of range')
