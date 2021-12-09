@@ -63,7 +63,7 @@ async def on_message(message):
     await bot.process_commands(message)
     return
 
-@bot.command(name='show-banned-words', help='Show a list of banned words')
+@bot.command(name='banned-words', help='Show a list of banned words')
 async def show_banned_words(ctx):
     embed = Embed(color = Color.from_rgb(255, 0, 0))
     embed.add_field(name="Banned words", value=banned_words, inline=False)
