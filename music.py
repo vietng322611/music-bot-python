@@ -148,7 +148,7 @@ class music(commands.Cog):
         self.users.append(ctx.author.name)
         self.avatar_urls.append(ctx.author.avatar_url)
         embed = Embed(color = Color.from_rgb(255, 0, 0))
-        embed.add_field(name="Added", value=url2, inline=False)
+        embed.add_field(name="Added", value=url, inline=False)
         embed.set_footer(text=f"Requested by {ctx.author.name}", icon_url=ctx.author.avatar_url)
         await ctx.message.channel.send(embed=embed)
         voice = ctx.guild.voice_client 
