@@ -84,7 +84,7 @@ class music(commands.Cog):
         status = ctx.author.voice
         if status == None:
             return await ctx.message.channel.send('Please join a voice channel')
-        if input == '!!play':
+        if input == '!!play' or input == '!!p':
             if self.queue != []:
                 if voice != None:
                     await self.playing(ctx, voice)
@@ -108,7 +108,7 @@ class music(commands.Cog):
             if voice != channel:
                 await voice.move_to(channel)
         else:
-            await channel.connect(reconnect=True)
+            await channel.connect()
         voice = ctx.voice_client
         await self.playing(ctx, voice)
         return
@@ -158,7 +158,7 @@ class music(commands.Cog):
                 return
             channel = status.channel
             if voice == None:
-                await channel.connect(reconnect=True)
+                await channel.connect()
             else:
                 if voice != channel:
                     await voice.move_to(channel)
