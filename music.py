@@ -18,6 +18,7 @@ class music(commands.Cog):
         self.queue_info = []
         self.users = []
         self.avatar_urls = []
+        self.loop = asyncio.new_event_loop()
         self.current_song = ""
 
     def get_video_info(self, url):
@@ -50,7 +51,7 @@ class music(commands.Cog):
                 embed = Embed(color = Color.from_rgb(255, 0, 0))
                 embed.add_field(name="Now Playing", value=title, inline=False)
                 embed.set_footer(text=f"Requested by {user}", icon_url=avatar)
-                voice.play(FFmpegPCMAudio(player, **self.FFMPEG_OPTS), after=lambda x=None: asyncio.new_event_loop().create_task(self.playing(ctx, voice)))
+                voice.play(FFmpegPCMAudio(player, **self.FFMPEG_OPTS), after=lambda x=None: self.loop.create_task(self.playing(ctx, voice)))
                 voice.source = PCMVolumeTransformer(voice.source, volume=1.0)
                 await ctx.send(embed=embed)
         else:
@@ -179,7 +180,7 @@ class music(commands.Cog):
             await ctx.message.channel.send('No song left')
         return
 
-    @commands.command(name='vol', aliases=['volume'],help='Change commands volume', usage='!!vol [number from 1 to 100]')
+    @commands.command(name='vol', help='Change commands volume', usage='!!vol [number from 1 to 100]')
     async def volume(self, ctx):
         input = ctx.message.content.strip('!!vol ')
         voice = ctx.voice_client
