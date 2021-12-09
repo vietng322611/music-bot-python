@@ -36,7 +36,4 @@ A simple music bot uses discord.py
 - pynacl
 
 ## Credit
-Coder siêu cấp: `lehoangtrong`  
-Tài liệu và refactor: `honguyeminh`  
-Chữa lỗi và sửa code: `vietng322611`  
-*Superman Squad*
+Creator: vietng322611 (Murasaki Rie)  
