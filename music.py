@@ -114,7 +114,7 @@ class music(commands.Cog):
             embed = Embed(color = Color.from_rgb(255, 0, 0))
             embed.add_field(name="Added to queue", value=url, inline=False)
             embed.set_footer(text=f"Requested by {ctx.author.name}", icon_url=ctx.author.avatar_url)
-            await ctx.message.channel.send('Added to queue')
+            await ctx.message.channel.send(embed=embed)
         return
     
     @commands.command(name='stop', aliases=['s'],help='Stop bot playing songs')
