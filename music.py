@@ -15,7 +15,6 @@ class music(commands.Cog):
         self.ydl_opts = {'format': 'bestaudio', 'noplaylist':'True'}
         self.FFMPEG_OPTS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5','options': '-vn'}
         self.queue = []
-        self.urls = []
         self.titles = []
         self.users = []
         self.avatar_urls = []
@@ -41,19 +40,18 @@ class music(commands.Cog):
         return res
 
     async def playing(self, ctx, voice):
-        
+        embed = Embed(color = Color.from_rgb(255, 0, 0))
         if not voice.is_playing():
             if self.queue != []:
                 player = self.queue.pop(0)
-                self.titles.pop(0)
-                url = self.urls.pop(0)
-                self.current_song = url
+                title = self.titles.pop(0)
+                self.current_song = title
                 user = self.users.pop(0)
                 avatar = self.avatar_urls.pop(0)
-                embed = Embed(color = Color.from_rgb(255, 0, 0))
-                embed.add_field(name="Now Playing", value=url, inline=False)
+                loop = asyncio.get_event_loop()
+                embed.add_field(name="Now Playing", value=title, inline=False)
                 embed.set_footer(text=f"Requested by {user}", icon_url=avatar)
-                voice.play(FFmpegPCMAudio(player, **self.FFMPEG_OPTS), after=lambda x=None: self.playing(ctx, voice))
+                voice.play(FFmpegPCMAudio(player, **self.FFMPEG_OPTS), after=lambda x=None: loop.create_task(self.playing(ctx, voice)))
                 voice.source = PCMVolumeTransformer(voice.source, volume=1.0)
                 await ctx.send(embed=embed)
         return
@@ -101,7 +99,6 @@ class music(commands.Cog):
         url2, title = self.ytdl(url)
         self.queue.append(url2)
         self.titles.append(title)
-        self.urls.append(url)
         self.users.append(ctx.author.name)
         self.avatar_urls.append(ctx.author.avatar_url)
         channel = status.channel
@@ -152,7 +149,6 @@ class music(commands.Cog):
         url2, title = self.ytdl(url)
         self.queue.append(url2)
         self.titles.append(title)
-        self.urls.append(url)
         self.users.append(ctx.author.name)
         self.avatar_urls.append(ctx.author.avatar_url)
         embed = Embed(color = Color.from_rgb(255, 0, 0))
@@ -232,7 +228,6 @@ class music(commands.Cog):
             return
         try:
             self.queue.pop(pos)
-            self.urls.pop(pos)
             self.titles.pop(pos)
             await ctx.message.channel.send('Deleted from queue')
         except:
@@ -252,7 +247,7 @@ class music(commands.Cog):
             return
         count = 0
         list_queue = ''
-        for i in self.queue_info:
+        for i in self.titles:
             list_queue += f'{count}: {i}\n'
             count += 1
         embed.add_field(name="Queued songs", value=list_queue, inline=False)
