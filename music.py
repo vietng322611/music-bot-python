@@ -76,7 +76,7 @@ class music(commands.Cog):
         await commands.Cog.process_commands(ctx)
         return None
 
-    @commands.command(name='play', help='Play song from url')
+    @commands.command(name='play', help='Play song from url', usage='[url or name]')
     async def play(self, ctx):
         input = ctx.message.content
         voice = ctx.voice_client
@@ -92,7 +92,7 @@ class music(commands.Cog):
                     voice = ctx.voice_client
                     await self.playing(ctx, voice)
             else:
-                await ctx.message.channel.send('Usage: !!play [your input]')
+                await ctx.message.channel.send('Usage: !!play [url] or [name]')
             return
         url = input.strip('!!play ')
         if not url.startswith("https://www.youtu") and not url.startswith("https://youtu") and not url.startswith("youtu"):
@@ -123,7 +123,7 @@ class music(commands.Cog):
             await voice.disconnect()
         return await ctx.message.channel.send('Stopped')
 
-    @commands.command(name='search', help='Search for a song on youtube')
+    @commands.command(name='search', help='Search for a song on youtube', usage='[name]')
     async def search(self, ctx):
         input = ctx.message.content
         req = input.strip('!!search ')
@@ -179,7 +179,7 @@ class music(commands.Cog):
             await ctx.message.channel.send('No song left')
         return
 
-    @commands.command(name='vol', help='Change commands volume')
+    @commands.command(name='vol', help='Change commands volume', usage='!!vol [number from 1 to 100]')
     async def volume(self, ctx):
         input = ctx.message.content.strip('!!vol ')
         voice = ctx.voice_client
@@ -212,7 +212,7 @@ class music(commands.Cog):
         else:
             return await ctx.message.channel.send("I'm not in a voice channel now" )
 
-    @commands.command(name='delete', help='Delete a song from queue')
+    @commands.command(name='delete', help='Delete a song from queue', usage='[song index]')
     async def delete(self, ctx):
         input = ctx.message.content
         pos = input.strip('!!delete ')
