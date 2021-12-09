@@ -76,7 +76,7 @@ class music(commands.Cog):
         await commands.Cog.process_commands(ctx)
         return None
 
-    @commands.command(name='play', aliases=['play', 'p'],help='Play song from url', usage='[url or name]')
+    @commands.command(name='play', aliases=['p'],help='Play song from url', usage='[url or name]')
     async def play(self, ctx):
         input = ctx.message.content
         voice = ctx.voice_client
@@ -112,7 +112,7 @@ class music(commands.Cog):
         await self.playing(ctx, voice)
         return
     
-    @commands.command(name='stop', aliases=['s', 'stop'],help='Stop bot playing songs')
+    @commands.command(name='stop', aliases=['s'],help='Stop bot playing songs')
     async def stop(self, ctx):
         voice = ctx.voice_client 
         if voice == None:
@@ -179,7 +179,7 @@ class music(commands.Cog):
             await ctx.message.channel.send('No song left')
         return
 
-    @commands.command(name='vol', aliases=['volume', 'vol'],help='Change commands volume', usage='!!vol [number from 1 to 100]')
+    @commands.command(name='vol', aliases=['volume'],help='Change commands volume', usage='!!vol [number from 1 to 100]')
     async def volume(self, ctx):
         input = ctx.message.content.strip('!!vol ')
         voice = ctx.voice_client
