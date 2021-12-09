@@ -8,14 +8,13 @@ import os
 import json
 
 def update(config):
-   release = config["Release"].strip("v")
+   release = config["Release"].strip("v").strip(".")
    url = config["Update_Url"]
    response = requests.get(url)
-   latest_release = response.json()["tag_name"].strip("v")
+   latest_release = response.json()["tag_name"].strip("v").strip(".")
    if response.status_code != 200:
       print("Can't fetch latest release, abort")
-   if float(release) < float(latest_release):
-      config["Release"] = latest_release
+   if release < latest_release:
       if response.json()["name"].strip(' ' + latest_release) != "Update":
          print(f"New release avalible, you can download it here: {url.replace('api.', '')}")
       else:
