@@ -13,7 +13,7 @@ class music(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.ydl_opts = {'format': 'bestaudio/best', 'noplaylist':'True'}
-        self.FFMPEG_OPTS = {'options': '-vn'}
+        self.FFMPEG_OPTS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5','options': '-vn'}
         self.queue = []
         self.queue_info = []
         self.users = []
