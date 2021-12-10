@@ -12,7 +12,7 @@ from discord.colour import Color
 from logger import logger
 from update import update
 from dotenv import load_dotenv
-from music import music
+from cogs.music import music
 
 config = json.load(open('./config.json'))
 sys.stdout = logger(config)
