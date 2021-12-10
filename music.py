@@ -12,11 +12,12 @@ import re
 class music(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.ydl_opts = {'format': 'bestaudio', 'noplaylist':'True'}
-        self.FFMPEG_OPTS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5','options': '-vn'}
+        self.ydl_opts = {'format': 'best', 'noplaylist':'True'}
+        self.FFMPEG_OPTS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 3','options': '-vn'}
         self.queue = []
         self.titles = []
         self.users = []
+        self.thumbnails = []
         self.avatar_urls = []
         self.current_song = ""
 
@@ -45,11 +46,14 @@ class music(commands.Cog):
             if self.queue != []:
                 player = self.queue.pop(0)
                 title = self.titles.pop(0)
+                url = self.titles.pop(0)
+                thumbnail = self.thumbnails.pop(0)
                 self.current_song = title
                 user = self.users.pop(0)
                 avatar = self.avatar_urls.pop(0)
                 loop = asyncio.get_event_loop()
-                embed.add_field(name="Now Playing", value=title, inline=False)
+                embed.set_thumbnail(url=thumbnail)
+                embed.add_field(name="Now Playing", value=f"[{title}]({url})", inline=False)
                 embed.set_footer(text=f"Requested by {user}", icon_url=avatar)
                 voice.play(FFmpegPCMAudio(player, **self.FFMPEG_OPTS), after=lambda x=None: loop.create_task(self.playing(ctx, voice)))
                 voice.source = PCMVolumeTransformer(voice.source, volume=1.0)
@@ -97,8 +101,11 @@ class music(commands.Cog):
         if not url.startswith("https://www.youtu") and not url.startswith("https://youtu") and not url.startswith("youtu"):
             url = 'https://www.youtube.com/watch?v=' + self.request(url)[0]
         url2, title = self.ytdl(url)
+        thumbnail_url = "https://img.youtube.com/vi/%s/0.jpg" % re.findall(r"watch\?v=(\S{11})", url)[0]
         self.queue.append(url2)
         self.titles.append(title)
+        self.titles.append(url)
+        self.thumbnails.append(thumbnail_url)
         self.users.append(ctx.author.name)
         self.avatar_urls.append(ctx.author.avatar_url)
         channel = status.channel
@@ -111,8 +118,9 @@ class music(commands.Cog):
         if not voice.is_playing():
             await self.playing(ctx, voice)
         else:
-            embed = Embed(color = Color.from_rgb(255, 0, 0))
-            embed.add_field(name="Added to queue", value=title, inline=False)
+            embed = Embed(color=Color.from_rgb(255, 0, 0))
+            embed.set_thumbnail(url=thumbnail_url)
+            embed.add_field(name="Added to queue", value=f"[{title}]({url})", inline=False)
             embed.set_footer(text=f"Requested by {ctx.author.name}", icon_url=ctx.author.avatar_url)
             await ctx.message.channel.send(embed=embed)
         return
@@ -149,10 +157,14 @@ class music(commands.Cog):
         url2, title = self.ytdl(url)
         self.queue.append(url2)
         self.titles.append(title)
+        self.titles.append(url)
+        thumbnail_url = "https://img.youtube.com/vi/%s/0.jpg" % re.findall(r"watch\?v=(\S{11})", url)[0]
+        self.thumbnails.append(thumbnail_url)
         self.users.append(ctx.author.name)
         self.avatar_urls.append(ctx.author.avatar_url)
         embed = Embed(color = Color.from_rgb(255, 0, 0))
-        embed.add_field(name="Added", value=title, inline=False)
+        embed.set_thumbnail(url=thumbnail_url)
+        embed.add_field(name="Added", value=f"[{title}]({url})", inline=False)
         embed.set_footer(text=f"Requested by {ctx.author.name}", icon_url=ctx.author.avatar_url)
         await ctx.message.channel.send(embed=embed)
         voice = ctx.guild.voice_client 
