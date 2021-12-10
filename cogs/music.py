@@ -2,7 +2,7 @@ from discord import FFmpegPCMAudio, PCMVolumeTransformer
 from discord.embeds import Embed
 from discord.colour import Color
 from discord.ext import commands
-from UrlHandler import url_exec
+from cogs.UrlHandler import url_exec
 
 import asyncio
 
