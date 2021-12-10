@@ -2,17 +2,13 @@ from discord import FFmpegPCMAudio, PCMVolumeTransformer
 from discord.embeds import Embed
 from discord.colour import Color
 from discord.ext import commands
-from youtube_dl import YoutubeDL as youtubedl
-from bs4 import BeautifulSoup as bs
+from UrlHandler import url_exec
 
-import requests
 import asyncio
-import re
 
 class music(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.ydl_opts = {'format': 'best', 'noplaylist':'True'}
         self.FFMPEG_OPTS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 3','options': '-vn'}
         self.queue = []
         self.titles = []
@@ -20,25 +16,6 @@ class music(commands.Cog):
         self.thumbnails = []
         self.avatar_urls = []
         self.current_song = ""
-
-    def get_video_info(self, url):
-        r = requests.get(url)
-        s = bs(r.text, "html.parser")
-        title = s.find('title').get_text().replace(' - YouTube', '')
-        return title
-
-    def ytdl(self, url):
-        with youtubedl(self.ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=False)
-            url2 = info['formats'][0]['url']
-            title = info['title'] 
-        return url2, title
-
-    def request(self, inp):
-        r = requests.get("https://www.youtube.com/results?search_query=" + inp)
-        s = bs(r.text, "html.parser")
-        res = re.findall(r"watch\?v=(\S{11})", s.decode())
-        return res
 
     async def playing(self, ctx, voice):
         embed = Embed(color = Color.from_rgb(255, 0, 0))
@@ -99,9 +76,9 @@ class music(commands.Cog):
             return
         url = input.strip('!!play ')
         if not url.startswith("https://www.youtu") and not url.startswith("https://youtu") and not url.startswith("youtu"):
-            url = 'https://www.youtube.com/watch?v=' + self.request(url)[0]
-        url2, title = self.ytdl(url)
-        thumbnail_url = "https://img.youtube.com/vi/%s/0.jpg" % re.findall(r"watch\?v=(\S{11})", url)[0]
+            url = 'https://www.youtube.com/watch?v=' + url_exec.request(url)[0]
+        url2, title = url_exec.ytdl(url)
+        thumbnail_url = url_exec.get_thumbnail(url)
         self.queue.append(url2)
         self.titles.append(title)
         self.titles.append(url)
@@ -139,13 +116,13 @@ class music(commands.Cog):
     @commands.command(name='search', help='Search for a song on youtube', usage='[name]')
     async def search(self, ctx):
         input = ctx.message.content
-        req = input.strip('!!search ')
-        res = self.request(req)
+        input = input.strip('!!search ')
+        res = url_exec.request(input)
         urls = ''
         for i in range(5):
-            urls += str(i) + ':' + self.get_video_info('https://www.youtube.com/watch?v=' + res[i]) + '\n'
+            urls += str(i) + ':' + url_exec.get_video_info('https://www.youtube.com/watch?v=' + res[i]) + '\n'
         embed = Embed(color = Color.from_rgb(255, 0, 0))
-        embed.add_field(name=f'Result for "{req}"', value=urls, inline=False)
+        embed.add_field(name=f'Result for "{input}"', value=urls, inline=False)
         await ctx.message.channel.send(embed=embed)
         await ctx.message.channel.send('Please choose a song')
         parameter = None
@@ -154,11 +131,11 @@ class music(commands.Cog):
         if parameter == "cancel":
             return await ctx.message.channel.send('Canceled')
         url = 'https://www.youtube.com/watch?v=' + res[parameter]
-        url2, title = self.ytdl(url)
+        url2, title = url_exec.ytdl(url)
         self.queue.append(url2)
         self.titles.append(title)
         self.titles.append(url)
-        thumbnail_url = "https://img.youtube.com/vi/%s/0.jpg" % re.findall(r"watch\?v=(\S{11})", url)[0]
+        thumbnail_url = url_exec.get_thumbnail(url)
         self.thumbnails.append(thumbnail_url)
         self.users.append(ctx.author.name)
         self.avatar_urls.append(ctx.author.avatar_url)
