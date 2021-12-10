@@ -17,6 +17,14 @@ class music(commands.Cog):
         self.avatar_urls = []
         self.current_song = ""
 
+    def add_to_queue(self, url, url2, title, user, thumbnail, avatar_url):
+        self.queue.append(url2)
+        self.titles.append(title)
+        self.titles.append(url)
+        self.thumbnails.append(thumbnail)
+        self.users.append(user)
+        self.avatar_urls.append(avatar_url)
+
     async def playing(self, ctx, voice):
         embed = Embed(color = Color.from_rgb(255, 0, 0))
         if not voice.is_playing():
@@ -79,12 +87,7 @@ class music(commands.Cog):
             url = 'https://www.youtube.com/watch?v=' + url_exec.request(url)[0]
         url2, title = url_exec.ytdl(url)
         thumbnail_url = url_exec.get_thumbnail(url)
-        self.queue.append(url2)
-        self.titles.append(title)
-        self.titles.append(url)
-        self.thumbnails.append(thumbnail_url)
-        self.users.append(ctx.author.name)
-        self.avatar_urls.append(ctx.author.avatar_url)
+        self.add_to_queue(url, url2, title, ctx.author.name, thumbnail_url, ctx.author.avatar_url)
         channel = status.channel
         if voice != None:
             if voice != channel:
@@ -132,13 +135,8 @@ class music(commands.Cog):
             return await ctx.message.channel.send('Canceled')
         url = 'https://www.youtube.com/watch?v=' + res[parameter]
         url2, title = url_exec.ytdl(url)
-        self.queue.append(url2)
-        self.titles.append(title)
-        self.titles.append(url)
         thumbnail_url = url_exec.get_thumbnail(url)
-        self.thumbnails.append(thumbnail_url)
-        self.users.append(ctx.author.name)
-        self.avatar_urls.append(ctx.author.avatar_url)
+        self.add_to_queue(url, url2, title, ctx.author.name, thumbnail_url, ctx.author.avatar_url)
         embed = Embed(color = Color.from_rgb(255, 0, 0))
         embed.set_thumbnail(url=thumbnail_url)
         embed.add_field(name="Added", value=f"[{title}]({url})", inline=False)

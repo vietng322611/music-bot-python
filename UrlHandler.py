@@ -6,13 +6,13 @@ import re
 
 class url_exec():
     def get_thumbnail(url):
-        if "watch\?v=" in url:
+        if url.find("/watch?v=") != -1:
             thumbnail_url = "https://img.youtube.com/vi/%s/0.jpg" % re.findall(r"watch\?v=(\S{11})", url)[0]
         else:
-            thumbnail_url = "https://img.youtube.com/vi/%s/0.jpg" % re.findall(r"/(\S{11})", url)[0]
+            thumbnail_url = "https://img.youtube.com/vi/%s/0.jpg" % re.findall(r"be/(\S{11})", url)[0]
         return thumbnail_url
 
-    def get_video_info(self, url):
+    def get_video_info(url):
         r = requests.get(url)
         s = bs(r.text, "html.parser")
         title = s.find('title').get_text().replace(' - YouTube', '')
