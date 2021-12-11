@@ -29,12 +29,13 @@ class url_exec():
         with youtubedl(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
             if 'entries' in info:
+                url = info['entries'][-1]['webpage_url']
                 url2 = info['entries'][0]['formats'][0]['url']
                 title = info['entries'][0]['title']
             else:
                 url2 = info['formats'][0]['url']
                 title = info['title'] 
-        return url2, title
+        return url, url2, title
 
     def request(input):
         r = requests.get("https://www.youtube.com/results?search_query=" + input)
