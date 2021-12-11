@@ -19,11 +19,21 @@ class url_exec():
         return title
 
     def ytdl(url):
-        ydl_opts = {'format': 'best', 'noplaylist':'True'}
+        ydl_opts = {
+            'format': 'best', 'noplaylist':'True',
+            'noplaylist': True,
+            'nocheckcertificate': True,
+            'default_search': 'auto',
+            'source_address': '0.0.0.0'
+        }
         with youtubedl(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
-            url2 = info['formats'][0]['url']
-            title = info['title'] 
+            if 'entries' in info:
+                url2 = info['entries'][0]['formats'][0]['url']
+                title = info['entries'][0]['title']
+            else:
+                url2 = info['formats'][0]['url']
+                title = info['title'] 
         return url2, title
 
     def request(input):

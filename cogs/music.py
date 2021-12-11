@@ -83,8 +83,6 @@ class music(commands.Cog):
                 await ctx.message.channel.send('Usage: !!play [url] or [name]')
             return
         url = input.strip('!!play ')
-        if not url.startswith("https://www.youtu") and not url.startswith("https://youtu") and not url.startswith("youtu"):
-            url = 'https://www.youtube.com/watch?v=' + url_exec.request(url)[0]
         url2, title = url_exec.ytdl(url)
         thumbnail_url = url_exec.get_thumbnail(url)
         self.add_to_queue(url, url2, title, ctx.author.name, thumbnail_url, ctx.author.avatar_url)
