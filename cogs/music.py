@@ -1,3 +1,4 @@
+from os import name
 from discord import FFmpegPCMAudio, PCMVolumeTransformer
 from discord.embeds import Embed
 from discord.colour import Color
@@ -26,7 +27,6 @@ class music(commands.Cog):
         self.avatar_urls.append(avatar_url)
 
     async def playing(self, ctx, voice):
-        embed = Embed(color = Color.from_rgb(255, 0, 0))
         if not voice.is_playing():
             if self.queue != []:
                 player = self.queue.pop(0)
@@ -37,8 +37,8 @@ class music(commands.Cog):
                 user = self.users.pop(0)
                 avatar = self.avatar_urls.pop(0)
                 loop = asyncio.get_event_loop()
+                embed = Embed(title="**Now Playing**", description=f"[{title}]({url})", color=Color.from_rgb(255, 0, 0))
                 embed.set_thumbnail(url=thumbnail)
-                embed.add_field(name="Now Playing", value=f"[{title}]({url})", inline=False)
                 embed.set_footer(text=f"Requested by {user}", icon_url=avatar)
                 voice.play(FFmpegPCMAudio(player, **self.FFMPEG_OPTS), after=lambda x=None: loop.create_task(self.playing(ctx, voice)))
                 voice.source = PCMVolumeTransformer(voice.source, volume=1.0)
@@ -96,9 +96,8 @@ class music(commands.Cog):
         if not voice.is_playing():
             await self.playing(ctx, voice)
         else:
-            embed = Embed(color=Color.from_rgb(255, 0, 0))
+            embed = Embed(title="**Now Playing**", description=f"[{title}]({url})", color=Color.from_rgb(255, 0, 0))
             embed.set_thumbnail(url=thumbnail_url)
-            embed.add_field(name="Added to queue", value=f"[{title}]({url})", inline=False)
             embed.set_footer(text=f"Requested by {ctx.author.name}", icon_url=ctx.author.avatar_url)
             await ctx.message.channel.send(embed=embed)
         return
@@ -122,8 +121,7 @@ class music(commands.Cog):
         urls = ''
         for i in range(5):
             urls += str(i) + ':' + url_exec.get_video_info('https://www.youtube.com/watch?v=' + res[i]) + '\n'
-        embed = Embed(color = Color.from_rgb(255, 0, 0))
-        embed.add_field(name=f'Result for "{input}"', value=urls, inline=False)
+        embed = Embed(title=f'**Result for "{input}"**', description=urls, color=Color.from_rgb(255, 0, 0))
         await ctx.message.channel.send(embed=embed)
         await ctx.message.channel.send('Please choose a song')
         parameter = None
@@ -135,9 +133,8 @@ class music(commands.Cog):
         url2, title = url_exec.ytdl(url)
         thumbnail_url = url_exec.get_thumbnail(url)
         self.add_to_queue(url, url2, title, ctx.author.name, thumbnail_url, ctx.author.avatar_url)
-        embed = Embed(color = Color.from_rgb(255, 0, 0))
+        embed = Embed(title="**Added to queue**", description=f"[{title}]({url})", color=Color.from_rgb(255, 0, 0))
         embed.set_thumbnail(url=thumbnail_url)
-        embed.add_field(name="Added", value=f"[{title}]({url})", inline=False)
         embed.set_footer(text=f"Requested by {ctx.author.name}", icon_url=ctx.author.avatar_url)
         await ctx.message.channel.send(embed=embed)
         voice = ctx.guild.voice_client 
