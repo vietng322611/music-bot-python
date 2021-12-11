@@ -96,7 +96,7 @@ class music(commands.Cog):
         if not voice.is_playing():
             await self.playing(ctx, voice)
         else:
-            embed = Embed(title="**Now Playing**", description=f"[{title}]({url})", color=Color.from_rgb(255, 0, 0))
+            embed = Embed(title="**Added to queue**", description=f"[{title}]({url})", color=Color.from_rgb(255, 0, 0))
             embed.set_thumbnail(url=thumbnail_url)
             embed.set_footer(text=f"Requested by {ctx.author.name}", icon_url=ctx.author.avatar_url)
             await ctx.message.channel.send(embed=embed)
