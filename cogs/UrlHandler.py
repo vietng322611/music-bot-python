@@ -18,7 +18,6 @@ class url_exec():
             'nocheckcertificate': 'True',
             'default_search': 'auto',
             'source_address': '0.0.0.0',
-            'audioformat': 'mp3'
         }
         with youtubedl(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
