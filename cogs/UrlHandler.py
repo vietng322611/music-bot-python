@@ -5,13 +5,6 @@ import requests
 import re
 
 class url_exec():
-    def get_thumbnail(url):
-        if url.find("/watch?v=") != -1:
-            thumbnail_url = "https://img.youtube.com/vi/%s/0.jpg" % re.findall(r"watch\?v=(\S{11})", url)[0]
-        else:
-            thumbnail_url = "https://img.youtube.com/vi/%s/0.jpg" % re.findall(r"be/(\S{11})", url)[0]
-        return thumbnail_url
-
     def get_video_info(url):
         r = requests.get(url)
         s = bs(r.text, "html.parser")
@@ -21,10 +14,11 @@ class url_exec():
     def ytdl(url):
         ydl_opts = {
             'format': 'best', 'noplaylist':'True',
-            'noplaylist': True,
-            'nocheckcertificate': True,
+            'noplaylist': 'True',
+            'nocheckcertificate': 'True',
             'default_search': 'auto',
-            'source_address': '0.0.0.0'
+            'source_address': '0.0.0.0',
+            'audioformat': 'mp3'
         }
         with youtubedl(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
@@ -32,10 +26,18 @@ class url_exec():
                 url = info['entries'][-1]['webpage_url']
                 url2 = info['entries'][0]['formats'][0]['url']
                 title = info['entries'][0]['title']
+                thumbnail = info['entries'][-1]['thumbnail']
+                duration = info['entries'][0]['duration']
             else:
-                url2 = info['formats'][0]['url']
+                url2 = info['url']
                 title = info['title'] 
-        return url, url2, title
+                thumbnail = info['thumbnail']
+                duration = info['duration']
+        m1, s1 = divmod(int(duration), 60)
+        if s1 == 0:
+            s1 = str(s1) + '0'
+        duration = '%s:%s' % (m1, s1)
+        return url, url2, title, thumbnail, duration
 
     def request(input):
         r = requests.get("https://www.youtube.com/results?search_query=" + input)
