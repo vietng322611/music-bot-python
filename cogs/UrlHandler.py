@@ -13,11 +13,11 @@ class url_exec():
 
     def ytdl(url):
         ydl_opts = {
-            'format': 'best', 'noplaylist':'True',
+            'format': 'best',
             'noplaylist': 'True',
             'nocheckcertificate': 'True',
             'default_search': 'auto',
-            'source_address': '0.0.0.0',
+            'audioformat': 'aac'
         }
         with youtubedl(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
