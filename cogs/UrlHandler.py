@@ -33,8 +33,8 @@ class url_exec():
                 thumbnail = info['thumbnail']
                 duration = info['duration']
         m1, s1 = divmod(int(duration), 60)
-        if s1 == 0:
-            s1 = str(s1) + '0'
+        if len(str(s1)) == 1:
+            s1 = '0' + str(s1)
         duration = '%s:%s' % (m1, s1)
         return url, url2, title, thumbnail, duration
 
