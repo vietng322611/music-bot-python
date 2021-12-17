@@ -115,7 +115,9 @@ class music(commands.Cog):
             await ctx.channel.send("I'm not playing anything")
             return 
         else:
-            voice.stop()
+            if voice.is_playing:
+                voice.source.cleanup()
+                voice.stop()
             await voice.disconnect()
         return await ctx.message.channel.send('Stopped')
 
@@ -195,6 +197,7 @@ class music(commands.Cog):
         voice = ctx.voice_client
         if voice != None:
             if voice.is_playing:
+                voice.source.cleanup()
                 voice.stop()
                 return await voice.disconnect()
         else:
