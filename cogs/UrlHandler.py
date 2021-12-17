@@ -13,9 +13,9 @@ class url_exec():
 
     def ytdl(url):
         ydl_opts = {
-            'format': 'best',
+            'format': 'bestaudio',
             'noplaylist': 'True',
-            'nocheckcertificate': 'True',
+            'agelimit': '20',
             'default_search': 'auto',
             'audioformat': 'mp3'
         }
