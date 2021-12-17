@@ -30,6 +30,16 @@ banned_words_spam = {}
 creator = 853514227738214421
 banned_words = ['lỏd'] # if you don't need you can delete it
 
+async def check(voice):
+    if voice != None:
+        member_count = len(voice.channel.members)
+        if member_count == 1:
+            if voice.is_playing():
+                voice.source.cleanup()
+                voice.stop()
+            await voice.disconnect()
+    return
+
 @bot.event
 async def on_ready():
     print(f'Connected')
@@ -61,6 +71,14 @@ async def on_message(message):
                     banned_words_spam.update({message.author.id : 1})
                     return await message.channel.send(f"<@{message.author.id}> used banned word. Subsequent violations may be banned by creator.", delete_after=5)
     await bot.process_commands(message)
+    return
+
+@bot.event
+async def on_voice_state_update(member, before, after):
+    if bot.voice_clients != []:
+        voice = bot.voice_clients[0]
+        if after.channel != voice:
+            await check(voice)
     return
 
 @bot.command(name='banned-words', help='Show a list of banned words')
