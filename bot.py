@@ -30,15 +30,14 @@ banned_words_spam = {}
 creator = 853514227738214421
 banned_words = ['lỏd'] # if you don't need you can delete it
 
-async def check(voice):
+async def voice_check(voice):
     if voice != None:
         member_count = len(voice.channel.members)
         if member_count == 1:
-            if voice.is_playing():
-                voice.source.cleanup()
+            if voice.is_playing():             
                 voice.stop()
+                voice.source.cleanup()
             await voice.disconnect()
-    return
 
 @bot.event
 async def on_ready():
@@ -71,20 +70,20 @@ async def on_message(message):
                     banned_words_spam.update({message.author.id : 1})
                     return await message.channel.send(f"<@{message.author.id}> used banned word. Subsequent violations may be banned by creator.", delete_after=5)
     await bot.process_commands(message)
-    return
 
 @bot.event
 async def on_voice_state_update(member, before, after):
-    if bot.voice_clients != []:
+    if member.name == bot.user.name:
+        return
+    elif bot.voice_clients != []:
         voice = bot.voice_clients[0]
         if after.channel != voice:
-            await check(voice)
-    return
+            await voice_check(voice)
 
 @bot.command(name='banned-words', help='Show a list of banned words')
 async def show_banned_words(ctx):
     embed = Embed(color = Color.from_rgb(255, 0, 0))
     embed.add_field(name="Banned words", value=banned_words, inline=False)
-    return await ctx.message.send(embed=embed)
+    await ctx.message.send(embed=embed)
 
 bot.run(TOKEN)
