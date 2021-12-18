@@ -17,7 +17,7 @@ class url_exec():
             'noplaylist': 'True',
             'agelimit': '20',
             'default_search': 'auto',
-            'audioformat': 'mp3'
+            'audioformat': 'aac'
         }
         with youtubedl(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
