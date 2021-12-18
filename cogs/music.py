@@ -45,8 +45,7 @@ class music(commands.Cog):
                 url = self.url.pop(0)
                 duration = self.titles.pop(0)
                 self.current_song = [title, duration]
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
+                loop = asyncio.get_event_loop()
                 embed = Embed(title="**Now Playing**", color=Color.from_rgb(255, 0, 0))
                 embed.add_field(name="**Song Name**", value=f"[{title}]({url})", inline=False)
                 embed.add_field(name="**Song Length**", value=f"{duration}", inline=False)
