@@ -34,9 +34,9 @@ async def voice_check(voice):
     if voice != None:
         member_count = len(voice.channel.members)
         if member_count == 1:
-            if voice.is_playing():             
+            if voice.is_playing():
+                voice.source.cleanup()       
                 voice.stop()
-                voice.source.cleanup()
             await voice.disconnect()
 
 @bot.event
