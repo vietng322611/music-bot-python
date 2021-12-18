@@ -16,6 +16,7 @@ class music(commands.Cog):
         self.users = []
         self.thumbnails = []
         self.current_song = []
+        self.task = []
 
     def create_queue(self, url, url2, title, user, thumbnail, avatar, duration):
         self.queue.append(url2)
@@ -44,12 +45,14 @@ class music(commands.Cog):
                 url = self.url.pop(0)
                 duration = self.titles.pop(0)
                 self.current_song = [title, duration]
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
                 embed = Embed(title="**Now Playing**", color=Color.from_rgb(255, 0, 0))
                 embed.add_field(name="**Song Name**", value=f"[{title}]({url})", inline=False)
                 embed.add_field(name="**Song Length**", value=f"{duration}", inline=False)
                 embed.set_thumbnail(url=self.thumbnails.pop(0))
                 embed.set_footer(text=f"Requested by {self.users.pop(0)}", icon_url=self.users.pop(0))
-                voice.play(FFmpegPCMAudio(self.queue.pop(0), **self.FFMPEG_OPTS), after=await self.playing(ctx, voice))
+                voice.play(FFmpegPCMAudio(self.queue.pop(0), **self.FFMPEG_OPTS), after=lambda x=None: self.task.append(loop.create_task(self.playing(ctx, voice))))
                 voice.source = PCMVolumeTransformer(voice.source, volume=1.0)
                 await ctx.send(embed=embed)
         return
@@ -107,7 +110,7 @@ class music(commands.Cog):
             await self.add_to_queue(ctx, url, url2, title, ctx.author.name, thumbnail_url, ctx.author.avatar_url, duration)
         return
     
-    @commands.command(name='stop', aliases=['s, leave, l'],help='Stop bot playing songs and leave channel')
+    @commands.command(name='stop', aliases=['s, leave, l'], help='Stop bot playing songs and leave channel')
     async def stop(self, ctx):
         voice = ctx.voice_client 
         if voice == None:
@@ -115,7 +118,10 @@ class music(commands.Cog):
             return 
         else:
             if voice.is_playing():
+                if self.task != []:
+                    self.task.pop(0).cancel()
                 voice.source.cleanup()
+                voice.stop()
             await voice.disconnect()
         return await ctx.message.channel.send('Stopped')
 
