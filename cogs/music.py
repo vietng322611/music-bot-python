@@ -215,6 +215,11 @@ class music(commands.Cog):
         try:
             self.queue.pop(pos)
             self.titles.pop(pos)
+            self.titles.pop(pos)
+            self.url.pop(pos)
+            self.thumbnails.pop(pos)
+            self.users.pop(pos)
+            self.users.pop(pos)
             await ctx.message.channel.send('Deleted from queue')
         except:
             await ctx.message.channel.send('Out of range')
