@@ -110,7 +110,7 @@ class music(commands.Cog):
             await self.add_to_queue(ctx, url, url2, title, ctx.author.name, thumbnail_url, ctx.author.avatar_url, duration)
         return
     
-    @commands.command(name='stop', aliases=['s, leave, l'], help='Stop bot playing songs and leave channel')
+    @commands.command(name='stop', aliases=['leave'], help='Stop bot playing songs and leave channel')
     async def stop(self, ctx):
         voice = ctx.voice_client 
         if voice == None:
