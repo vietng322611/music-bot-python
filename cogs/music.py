@@ -9,7 +9,7 @@ import asyncio
 class music(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.FFMPEG_OPTS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5','options': '-vn -g 10'}
+        self.FFMPEG_OPTS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5','options': '-vn'}
         self.queue = []
         self.titles = []
         self.url = []
@@ -44,13 +44,12 @@ class music(commands.Cog):
                 url = self.url.pop(0)
                 duration = self.titles.pop(0)
                 self.current_song = [title, duration]
-                loop = asyncio.get_event_loop()
                 embed = Embed(title="**Now Playing**", color=Color.from_rgb(255, 0, 0))
                 embed.add_field(name="**Song Name**", value=f"[{title}]({url})", inline=False)
                 embed.add_field(name="**Song Length**", value=f"{duration}", inline=False)
                 embed.set_thumbnail(url=self.thumbnails.pop(0))
                 embed.set_footer(text=f"Requested by {self.users.pop(0)}", icon_url=self.users.pop(0))
-                voice.play(FFmpegPCMAudio(self.queue.pop(0), **self.FFMPEG_OPTS), after=lambda x=None: loop.create_task(self.playing(ctx, voice)))
+                voice.play(FFmpegPCMAudio(self.queue.pop(0), **self.FFMPEG_OPTS), after=await self.playing(ctx, voice))
                 voice.source = PCMVolumeTransformer(voice.source, volume=1.0)
                 await ctx.send(embed=embed)
         return
@@ -108,16 +107,15 @@ class music(commands.Cog):
             await self.add_to_queue(ctx, url, url2, title, ctx.author.name, thumbnail_url, ctx.author.avatar_url, duration)
         return
     
-    @commands.command(name='stop', aliases=['s'],help='Stop bot playing songs')
+    @commands.command(name='stop', aliases=['s, leave, l'],help='Stop bot playing songs and leave channel')
     async def stop(self, ctx):
         voice = ctx.voice_client 
         if voice == None:
             await ctx.channel.send("I'm not playing anything")
             return 
         else:
-            if voice.is_playing:
+            if voice.is_playing():
                 voice.source.cleanup()
-                voice.stop()
             await voice.disconnect()
         return await ctx.message.channel.send('Stopped')
 
@@ -191,17 +189,6 @@ class music(commands.Cog):
         volume = input / 100
         voice.source.volume = volume
         return await ctx.message.channel.send(f'**Volume changed to** {int(input)}/200')
-
-    @commands.command(name='leave', help='Leave voice channel')
-    async def leave(self, ctx):
-        voice = ctx.voice_client
-        if voice != None:
-            if voice.is_playing:
-                voice.source.cleanup()
-                voice.stop()
-                return await voice.disconnect()
-        else:
-            return await ctx.message.channel.send("I'm not in a voice channel now" )
 
     @commands.command(name='delete', aliases=['d', 'del'],help='Delete a song from queue', usage='[song index]')
     async def delete(self, ctx):
