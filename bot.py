@@ -1,10 +1,15 @@
 # This made by vietng322611, please be respect, don't copy it without permission, you can change the code inside into your own.
 # If something goes wrong, send me your log or try restarting the bot.
 
+import modwall; modwall.check() # Library checker
+
 import sys
 import os
 import json
+import asyncio
+import signal
 
+from time import sleep
 from discord.ext import commands
 from discord.utils import get
 from discord.embeds import Embed
@@ -86,4 +91,17 @@ async def show_banned_words(ctx):
     embed.add_field(name="Banned words", value=banned_words, inline=False)
     await ctx.message.send(embed=embed)
 
+def clean(signum, frame):
+    print("Logging bot out....")
+    asyncio.get_event_loop().create_task(bot.close())
+    print("Cleaning tasks....")
+    [task.cancel() for task in asyncio.all_tasks()]
+    asyncio.get_running_loop().stop()
+    sys.exit()
+    if RuntimeError:
+        pass
+    print("Good bye!")
+    sleep(0.5)
+
+signal.signal(signal.SIGINT, clean)
 bot.run(TOKEN)
