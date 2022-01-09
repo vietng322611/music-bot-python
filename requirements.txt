@@ -1,6 +1,0 @@
-beautifulsoup4
-discord.py
-requests
-youtube_dl
-python-dotenv
-pynacl
