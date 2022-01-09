@@ -1,5 +1,5 @@
 # Discord music bot
-A simple music bot uses discord.py  
+A simple music bot using discord.py  
 ## Usage
 - Download:
   - Using git:
