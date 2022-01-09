@@ -8,8 +8,10 @@ class logger:
         self.file = f
         self.log = open(self.file["Log_Path"] + 'log-' + str(datetime.now().date()) + '@' + str(datetime.now().strftime('%H.%M.%S')) + '.txt', 'w')
         self.log.write('============================================\n')
+
     def flush(self):
         pass
+
     def write(self, text):      
         text = text.rstrip()
         if text != '':
