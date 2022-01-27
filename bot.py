@@ -17,7 +17,10 @@ from dotenv import load_dotenv
 from cogs.music import music
 
 config = json.load(open('./config.json'))
-sys.stdout = logger(config)
+if os.path.exists('logs'):
+    sys.stdout = logger(config)
+else:
+    os.mkdir('logs')
 if config["Check_Update_On_Start"] == "True":
     update(config)
 
