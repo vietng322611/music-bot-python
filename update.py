@@ -22,14 +22,16 @@ def update_release(latest_release, config, response):
 
 def update(config):
    update = config["Update"].strip("v").strip(".")
+   release = config["Release"].strip("v").strip(".")
    url = config["Update_Url"]
    response = requests.get(url)
    latest_update = response.json()["tag_name"].strip("v").strip(".")
    if response.status_code != 200:
       print("Can't fetch latest release, abort")
    if response.json()["name"].strip(' ' + latest_update) != "Update":
-      print(f"New release avalible, downloading release {latest_update.strip('v')}")
-      update_release(latest_update, config, response)
+      if release < latest_update:
+         print(f"New release avalible, downloading release {latest_update.strip('v')}")
+         update_release(latest_update, config, response)
       return
    elif update < latest_update:
       print(f'New update avalible: {latest_update}')
