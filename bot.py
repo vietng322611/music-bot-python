@@ -6,6 +6,7 @@ import modwall; modwall.check() # Library checker
 import sys
 import os
 import json
+import asyncio
 
 from discord.ext import commands
 from discord.utils import get
@@ -19,7 +20,7 @@ from cogs.music import music
 config = json.load(open('./config.json'))
 sys.stdout = logger(config)
 if config["Check_Update_On_Start"] == "True":
-    update(config)
+    asyncio.get_event_loop().create_task(update(config))
 
 load_dotenv()
 TOKEN = os.getenv("BOT_TOKEN")
