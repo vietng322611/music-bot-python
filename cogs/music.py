@@ -121,8 +121,9 @@ class music(commands.Cog):
                     self.task.pop(0).cancel()
                 voice.source.cleanup()
                 voice.stop()
-            await voice.disconnect()
-        return await ctx.message.channel.send('Stopped')
+                await voice.disconnect()
+                return await ctx.message.channel.send('Stopped')
+        return await ctx.message.channel.send('Leaving the voice channel')
 
     @commands.command(name='search', help='Search for a song on youtube', usage='[name]')
     async def search(self, ctx):
@@ -161,9 +162,16 @@ class music(commands.Cog):
     
     @commands.command(name='skip', help='Skip to next song in queue')
     async def skip(self, ctx):
-        voice = ctx.guild.voice_client
-        if voice == None:
+        voice = ctx.voice_client
+        status = ctx.author.voice
+        if status == None:
+            await ctx.message.channel.send('Please join a voice channel and play something')
+            return
+        elif voice == None or not voice.is_playing():
             await ctx.message.channel.send("I'm not playing anything")
+            return
+        elif status.channel.id != voice.id:
+            await ctx.message.channel.send('Please switch to my current voice channel to use that')
         elif self.queue != []:
             voice.stop()
             await self.playing(ctx, voice)
@@ -180,9 +188,11 @@ class music(commands.Cog):
         if status == None:
             await ctx.message.channel.send('Please join a voice channel and play something')
             return
-        elif voice == None:
+        elif voice == None or not voice.is_playing():
             await ctx.message.channel.send("I'm not playing anything")
             return
+        elif status.channel.id != voice.id:
+            await ctx.message.channel.send('Please switch to my current voice channel to use that')
         try:
             input = float(input)
         except ValueError:
@@ -237,3 +247,23 @@ class music(commands.Cog):
             count += 1
         embed.add_field(name="Queued songs", value=list_queue, inline=False)
         return await ctx.message.channel.send(embed=embed)
+    
+    @commands.command(name='pause', aliases=['resume'], help='Pause/Resume the current song')
+    async def pause(self, ctx):
+        voice = ctx.voice_client
+        status = ctx.author.voice
+        if status == None:
+            await ctx.message.channel.send('Please join a voice channel and play something')
+            return
+        elif voice == None:
+            await ctx.message.channel.send("I'm not playing anything")
+            return
+        elif status.channel.id != voice.id:
+            await ctx.message.channel.send('Please switch to my current voice channel to use that')
+        else:
+            if not voice.is_paused():
+                voice.pause()
+                await ctx.message.send('Player paused')
+            else:
+                voice.resume('Player resumed')
+        return
