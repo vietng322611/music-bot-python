@@ -28,7 +28,8 @@ def update(config):
    latest_update = response.json()["tag_name"].strip("v").strip(".")
    if response.status_code != 200:
       print("Can't fetch latest release, abort")
-   if response.json()["name"].strip(' ' + latest_update) != "Update":
+   elif response.json()["name"].strip(' ' + 'v' + latest_update) != "Update":
+      print(response.json()["name"])
       if release < latest_update:
          print(f"New release avalible, downloading release {latest_update.strip('v')}")
          update_release(latest_update, config, response)
