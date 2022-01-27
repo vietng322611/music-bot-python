@@ -20,7 +20,7 @@ def update_release(latest_release, config, response):
    time.sleep(2)
    return
 
-def update(config):
+async def update(config):
    update = config["Update"].strip("v").strip(".")
    url = config["Update_Url"]
    response = requests.get(url)
@@ -37,7 +37,7 @@ def update(config):
       package_url = response.json()["assets"][0]["browser_download_url"]
       urllib.request.urlretrieve(package_url, "./bot-project.zip")
       with ZipFile("bot-project.zip", 'r') as zip:
-         zip.extractall("./")
+         await zip.extractall("./")
       os.remove("bot-project.zip")
       with open('config.json', 'w') as fp:
          json.dump(config, fp)
