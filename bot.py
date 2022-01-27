@@ -1,16 +1,12 @@
 # This made by vietng322611, please be respect, don't copy it without permission, you can change the code inside into your own.
 # If something goes wrong, send me your log or try restarting the bot.
 
-import discord
 import modwall; modwall.check() # Library checker
 
 import sys
 import os
 import json
-import asyncio
-import signal
 
-from time import sleep
 from discord.ext import commands
 from discord.utils import get
 from discord.embeds import Embed
