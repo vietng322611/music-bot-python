@@ -108,22 +108,6 @@ class music(commands.Cog):
         else:
             await self.add_to_queue(ctx, url, url2, title, ctx.author.name, thumbnail_url, ctx.author.avatar_url, duration)
         return
-    
-    @commands.command(name='stop', aliases=['leave'], help='Stop bot playing songs and leave channel')
-    async def stop(self, ctx):
-        voice = ctx.voice_client 
-        if voice == None:
-            await ctx.channel.send("I'm not playing anything")
-            return 
-        else:
-            if voice.is_playing():
-                if self.task != []:
-                    self.task.pop(0).cancel()
-                voice.source.cleanup()
-                voice.stop()
-                await voice.disconnect()
-                return await ctx.message.channel.send('Stopped')
-        return await ctx.message.channel.send('Leaving the voice channel')
 
     @commands.command(name='search', help='Search for a song on youtube', usage='[name]')
     async def search(self, ctx):
@@ -266,4 +250,26 @@ class music(commands.Cog):
                 await ctx.message.send('Player paused')
             else:
                 voice.resume('Player resumed')
+        return
+    
+    @commands.command(name='stop', help='Stop the current song and clear the queue')
+    async def stop(self, ctx):
+        voice = ctx.voice_client
+        status = ctx.author.voice
+        if status == None:
+            await ctx.message.channel.send('Please join a voice channel and play something')
+            return
+        elif voice == None:
+            await ctx.message.channel.send("I'm not playing anything")
+            return
+        elif status.channel.id != voice.id:
+            await ctx.message.channel.send('Please switch to my current voice channel to use that')
+        else:
+            self.queue = []
+            self.titles = []
+            self.url = []
+            self.thumbnails = []
+            self.users = []
+            voice.stop()
+            await ctx.message.channel.send('Stopped')
         return
