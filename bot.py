@@ -32,7 +32,7 @@ bot.add_cog(music(bot))
 queue = []
 queue_info = []
 banned_words_spam = {}
-creator = 853514227738214421
+creator = config["Creator_Id"]
 banned_words = ['lỏd'] # if you don't need you can delete it
 
 async def voice_check(voice):
