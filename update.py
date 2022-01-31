@@ -6,19 +6,21 @@ import time
 import urllib
 import os
 import json
+import sys
 
 def update_release(latest_release, config, response):
    config["Release"] = latest_release
    package_url = response.json()["assets"][0]["browser_download_url"]
    urllib.request.urlretrieve(package_url, "./bot-project.zip")
    with ZipFile("bot-project.zip", 'r') as zip:
-      zip.extractall("./")
+      while zip.extractall("./"):
+         pass
       os.remove("bot-project.zip")
-      with open('config.json', 'w') as fp:
-         json.dump(config, fp)
-      print('Update is done')
+   with open('config.json', 'w') as fp:
+      json.dump(config, fp)
+   print('Update is done, restarting bot')
    time.sleep(2)
-   return
+   
 
 def update(config):
    update = config["Update"].strip("v").strip(".")
@@ -45,8 +47,7 @@ def update(config):
          os.remove("bot-project.zip")
       with open('config.json', 'w') as fp:
          json.dump(config, fp)
-      print('Update is done')
+      print('Update is done, restarting bot')
    else:
       print('Everything is up to date')
-   time.sleep(2)
-   return
+   os.execl(sys.executable, sys.executable, *sys.argv)
