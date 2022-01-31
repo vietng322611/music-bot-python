@@ -14,6 +14,8 @@ def update(config):
    latest_update = response.json()["tag_name"].strip("v").strip(".")
    if response.status_code != 200:
       print("Can't fetch latest release, abort")
+   elif response.json()["name"].strip(' ' + 'v' + latest_update) != "Update":
+      pass
    elif update < latest_update:
       print(f'New update avalible: {latest_update}')
       print(f'Downloading update: {latest_update.strip("v")}')
@@ -27,6 +29,5 @@ def update(config):
          json.dump(config, fp)
       print('Update is done, restarting bot')
       os.execl(sys.executable, sys.executable, *sys.argv)
-   else:
-      print('Everything is up to date')
+   print('Everything is up to date')
    return
