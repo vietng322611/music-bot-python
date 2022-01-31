@@ -4,7 +4,6 @@ import requests
 from zipfile import ZipFile
 import urllib
 import os
-import json
 import sys
 
 def update(config):
@@ -24,9 +23,7 @@ def update(config):
       with ZipFile("bot-project.zip", 'r') as zip:
          while zip.extractall("./"):
             pass
-         os.remove("bot-project.zip")
-      with open('config.json', 'w') as fp:
-         json.dump(config, fp)
+      os.remove("bot-project.zip")
       print('Update is done, restarting bot')
       os.execl(sys.executable, sys.executable, *sys.argv)
    print('Everything is up to date')
