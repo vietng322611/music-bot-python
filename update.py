@@ -4,7 +4,6 @@ import requests
 from zipfile import ZipFile
 import urllib
 import os
-import json
 import sys
 
 def update(config):
