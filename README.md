@@ -36,6 +36,7 @@ ffmpeg: ```https://www.ffmpeg.org/download.html```
 - youtube_dl
 - python-dotenv
 - pynacl
-
+## Note
+If you have problems with your bot, try downloading the latest release in the Releases tab and extract the zip file into your bot folder  
 ## Credit
 Creator: vietng322611 (Murasaki Rie)  
