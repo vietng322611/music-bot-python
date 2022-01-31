@@ -1,5 +1,7 @@
 # Discord music bot
 A simple music bot using discord.py  
+You need to install ffmpeg and add directory into PATH in order to use the bot  
+ffmpeg: ```https://www.ffmpeg.org/download.html```
 ## Usage
 - Download:
   - Using git:
