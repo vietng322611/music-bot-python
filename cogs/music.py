@@ -271,5 +271,7 @@ class music(commands.Cog):
             self.thumbnails = []
             self.users = []
             voice.stop()
+            voice.cleanup()
+            await voice.disconnect()
             await ctx.message.channel.send('Stopped')
         return
