@@ -247,9 +247,10 @@ class music(commands.Cog):
         else:
             if not voice.is_paused():
                 voice.pause()
-                await ctx.message.send('Player paused')
+                await ctx.message.channel.send('Player paused')
             else:
-                voice.resume('Player resumed')
+                voice.resume()
+                await ctx.message.channel.send('Player resumed')
         return
     
     @commands.command(name='stop', help='Stop the current song and clear the queue')
