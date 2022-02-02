@@ -242,7 +242,7 @@ class music(commands.Cog):
         elif voice == None:
             await ctx.message.channel.send("I'm not playing anything")
             return
-        elif status.channel.id != voice.id:
+        elif status.channel.id != voice.channel.id:
             await ctx.message.channel.send('Please switch to my current voice channel to use that')
         else:
             if not voice.is_paused():
