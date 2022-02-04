@@ -253,7 +253,7 @@ class music(commands.Cog):
                 await ctx.message.channel.send('Player resumed')
         return
     
-    @commands.command(name='stop', help='Stop the current song and clear the queue')
+    @commands.command(name='stop', aliases=['leave'], help='Stop the current song and clear the queue')
     async def stop(self, ctx):
         voice = ctx.voice_client
         status = ctx.author.voice
