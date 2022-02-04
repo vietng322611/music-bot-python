@@ -276,3 +276,25 @@ class music(commands.Cog):
             await voice.disconnect()
             await ctx.message.channel.send('Stopped')
         return
+    
+    @commands.command(name='gg', aliases=['g'], help='Text to speech')
+    async def gg(self, ctx):
+      input = ctx.message.content.strip('!!gg ')
+      if input == '':
+        await ctx.message.channel.send('Please enter something')
+        return
+      voice = ctx.voice_client
+      status = ctx.author.voice
+      if status == None:
+        await ctx.message.channel.send('Please join a voice channel')
+        return
+      elif voice == None:
+        await status.channel.connect()
+        voice = ctx.voice_client
+      elif status.channel.id != voice.channel.id:
+        await ctx.message.channel.send('Please switch to my current voice channel to use that')
+        return
+      tts = gTTS(text=input, lang='vi')
+      tts.save('gg.mp3')
+      voice.play(FFmpegPCMAudio('gg.mp3'))
+      return
