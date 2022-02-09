@@ -3,6 +3,7 @@ from discord.embeds import Embed
 from discord.colour import Color
 from discord.ext import commands
 from cogs.UrlHandler import url_exec
+from gtts import gTTS
 
 import asyncio
 
