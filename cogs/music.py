@@ -297,5 +297,7 @@ class music(commands.Cog):
         return
       tts = gTTS(text=input, lang='vi')
       tts.save('gg.mp3')
-      voice.play(FFmpegPCMAudio('gg.mp3'))
+      if not voice.is_playing():
+        voice.play(FFmpegPCMAudio('gg.mp3'))
+        voice.source = PCMVolumeTransformer(voice.source, volume=1.0)
       return

@@ -92,8 +92,9 @@ async def on_voice_state_update(member, before, after):
             if after.channel == voice:
                 tts = gTTS(text="", lang='vi')
                 tts.save('gg.mp3')
-                voice.play(FFmpegPCMAudio('gg.mp3'))
-                voice.source = PCMVolumeTransformer(voice.source, volume=1.0)
+                if not voice.is_playing():
+                    voice.play(FFmpegPCMAudio('gg.mp3'))
+                    voice.source = PCMVolumeTransformer(voice.source, volume=1.0)
                 return
         await voice_check(voice)
 
