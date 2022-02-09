@@ -17,6 +17,8 @@ from update import update
 from dotenv import load_dotenv
 from cogs.music import music
 from keep_alive import keep_alive
+from discord import FFmpegPCMAudio, PCMVolumeTransformer
+from gtts import gTTS
 
 keep_alive()
 config = json.load(open('./config.json'))
@@ -88,6 +90,10 @@ async def on_voice_state_update(member, before, after):
     elif bot.voice_clients != []:
         for voice in bot.voice_clients:
             if after.channel == voice:
+                tts = gTTS(text="", lang='vi')
+                tts.save('gg.mp3')
+                voice.play(FFmpegPCMAudio('gg.mp3'))
+                voice.source = PCMVolumeTransformer(voice.source, volume=1.0)
                 return
         await voice_check(voice)
 
