@@ -19,8 +19,8 @@ from cogs.music import music
 from keep_alive import keep_alive
 from discord import FFmpegPCMAudio, PCMVolumeTransformer
 from gtts import gTTS
+from time import sleep
 
-keep_alive()
 config = json.load(open('./config.json'))
 if os.path.exists('logs'):
     sys.stdout = logger(config)
@@ -29,27 +29,27 @@ else:
 if config["Check_Update_On_Start"] == "True":
     update(config)
 
-load_dotenv('token.env')
+load_dotenv()
 TOKEN = os.getenv("BOT_TOKEN")
 
 intents = Intents.default()
 intents.members = True
 bot = commands.Bot(description="A simple bot made by vietng322611", command_prefix=config["Prefix"], intents=intents)
+bot = commands.Bot(description="A simple bot made by vietng322611", command_prefix=config["Prefix"])
 bot.add_cog(music(bot))
 queue = []
 queue_info = []
 banned_words_spam = {}
 creator = config["Creator_Id"]
-banned_words = [] # If someone annoy you by spamming words, ban that word
+banned_words = ['lỏd', 'emotional damage', 'ì mâu sần nồ đam mẹt', 'ì mâu sần nồ đam mệt', 'emotional dâmge', 'sang chấn tâm lí', 'sang chấn tâm lý']
 
 async def voice_check(voice):
-    if voice != None:
-        member_count = len(voice.channel.members)
-        if member_count == 1:
-            if voice.is_playing():
-                voice.source.cleanup()       
-                voice.stop()
-            await voice.disconnect()
+    member_count = len(voice.channel.members)
+    if member_count == 1:
+        if voice.is_playing():
+            voice.cleanup()       
+            voice.stop()
+            return await voice.disconnect()
 
 @bot.event
 async def on_ready():
@@ -88,30 +88,37 @@ async def on_voice_state_update(member, before, after):
     if member.name == bot.user.name:
         return
     elif bot.voice_clients != []:
+      if after.channel == None:
         for voice in bot.voice_clients:
-            if after.channel == voice:
-                tts = gTTS(text="", lang='vi')
-                tts.save('gg.mp3')
-                if not voice.is_playing():
-                    voice.play(FFmpegPCMAudio('gg.mp3'))
-                    voice.source = PCMVolumeTransformer(voice.source, volume=1.0)
-                return
-        await voice_check(voice)
-
+          if before.channel.id == voice.channel.id:
+            await voice_check(voice)
+            return
+      else:
+        for voice in bot.voice_clients:
+          if after.channel.id == voice.channel.id:
+            if not voice.is_playing():
+              tts = gTTS(text="Ây thằng nhóc vừa vào mà không chào ai à", lang='vi')
+              tts.save('gg.mp3')
+              sleep(1)
+              voice.play(FFmpegPCMAudio('gg.mp3'))
+              voice.source = PCMVolumeTransformer(voice.source, volume=2.0)
+              return
 @bot.event
 async def on_member_join(member):
-    server = bot.get_server(member.server)
-    await get(server.text_channels, name='welcome').send(f"{member.name} has joined")
+  server = bot.get_server(member.server)
+  print(server)
+  await get(server.text_channels, name='welcome').send(f"{member.name} has joined")
 
 @bot.event
 async def on_member_remove(member):
-    server = bot.get_server(member.server)
-    await get(server.text_channels, name='welcome').send(f"{member.name} has leaved")
+  server = bot.get_server(member.server)
+  print(server)
+  await get(server.text_channels, name='welcome').send(f"{member.name} has leaved")
 
 @bot.command(name='banned-words', help='Show a list of banned words')
 async def show_banned_words(ctx):
-    embed = Embed(color = Color.from_rgb(255, 0, 0))
-    embed.add_field(name="Banned words", value=banned_words, inline=False)
-    await ctx.message.channel.send(embed=embed)
+  embed = Embed(color = Color.from_rgb(255, 0, 0))
+  embed.add_field(name="Banned words", value=banned_words, inline=False)
+  await ctx.message.channel.send(embed=embed)
 
 bot.run(TOKEN)
