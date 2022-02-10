@@ -15,6 +15,9 @@ class logger:
     def write(self, text):      
         text = text.rstrip()
         if text != '':
-           stdout.write('%s\n' % (text))
-           self.log.write('%s\n' % (text))
+            try:
+                stdout.write('%s\n' % (text))
+                self.log.write('%s\n' % (text))
+            except UnicodeEncodeError:
+                return
         return
