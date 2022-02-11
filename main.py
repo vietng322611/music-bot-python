@@ -43,13 +43,12 @@ creator = config["Creator_Id"]
 banned_words = [] # If someone annoy you by spamming words, ban that word
 
 async def voice_check(voice):
-    if voice != None:
-        member_count = len(voice.channel.members)
-        if member_count == 1:
-            if voice.is_playing():
-                voice.source.cleanup()       
-                voice.stop()
-            await voice.disconnect()
+    member_count = len(voice.channel.members)
+    if member_count == 1:
+        if voice.is_playing():
+            voice.source.cleanup()       
+            voice.stop()
+        await voice.disconnect()
 
 @bot.event
 async def on_ready():

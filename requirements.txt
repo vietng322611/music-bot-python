@@ -4,3 +4,4 @@ requests
 youtube_dl
 python-dotenv
 pynacl
+gtts
