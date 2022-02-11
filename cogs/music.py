@@ -295,9 +295,21 @@ class music(commands.Cog):
       elif status.channel.id != voice.channel.id:
         await ctx.message.channel.send('Please switch to my current voice channel to use that')
         return
-      tts = gTTS(text=input, lang='vi')
-      tts.save('gg.mp3')
       if not voice.is_playing():
+        tts = gTTS(text=input, lang='vi')
+        tts.save('gg.mp3')
         voice.play(FFmpegPCMAudio('gg.mp3'))
-        voice.source = PCMVolumeTransformer(voice.source, volume=1.0)
+        voice.source = PCMVolumeTransformer(voice.source, volume=1.5)
       return
+
+    @commands.command(name='join', help='Make bot join a vocie channel')
+    async def join(self, ctx):
+        voice = ctx.voice_client
+        status = ctx.author.voice
+        if status == None:
+            await ctx.message.channel.send('Please join a voice channel')
+        elif voice == None:
+            await status.channel.connect()
+        elif status.channel.id != voice.channel.id:
+            await ctx.message.channel.send("I'm currently in a voice channel")
+        return
