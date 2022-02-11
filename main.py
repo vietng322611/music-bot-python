@@ -16,7 +16,6 @@ from logger import logger
 from update import update
 from dotenv import load_dotenv
 from cogs.music import music
-from keep_alive import keep_alive
 from discord import FFmpegPCMAudio, PCMVolumeTransformer
 from gtts import gTTS
 from time import sleep
