@@ -22,6 +22,7 @@ from time import sleep
 config = json.load(open('./config.json'))
 if os.path.exists('logs'):
     sys.stdout = logger(config)
+    sys.stderr = logger(config)
 else:
     os.mkdir('logs')
 if config["Check_Update_On_Start"] == "True":
@@ -39,7 +40,7 @@ queue = []
 queue_info = []
 banned_words_spam = {}
 creator = config["Creator_Id"]
-banned_words = []
+banned_words = ['lỏd', 'emotional damage', 'ì mâu sần nồ đam mẹt', 'ì mâu sần nồ đam mệt', 'emotional dâmge', 'sang chấn tâm lí', 'sang chấn tâm lý']
 
 async def voice_check(voice, channel): # Check if only bot in voice channel
     member_count = len(channel.members)
@@ -96,7 +97,7 @@ async def on_voice_state_update(member, before, after): # Get voice status
         else:
           if after.channel.id == channel.id: # If someone joins the voice channel of the bot, bot will say somgthing, j4f
             if not voice.is_playing():
-              tts = gTTS(text="", lang='vi')
+              tts = gTTS(text="Ây thằng nhóc vừa vào mà không chào ai à", lang='vi')
               tts.save('gg.mp3')
               sleep(1)
               voice.play(discord.FFmpegPCMAudio('gg.mp3'))
