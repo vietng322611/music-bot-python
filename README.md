@@ -1,6 +1,6 @@
 # Discord music bot
 A simple music bot using discord.py  
-You need to install ffmpeg and add ffmpeg directory into PATH in order to use the bot  
+You need to install ffmpeg and add ffmpeg's directory into PATH in order to use the bot  
 ffmpeg: ```https://www.ffmpeg.org/download.html```
 ## Usage
 - Download:
@@ -9,7 +9,7 @@ ffmpeg: ```https://www.ffmpeg.org/download.html```
     git clone https://github.com/vietng322611/music-bot-python
     ```
   - Or download by click on "Code" button and click at "Download zip"
-- Install python3 (don't use python 3.10, some modules aren't supported this yet)
+- Install python3 (recommended python 3.9 for less error)
 - Note: Remember to tick add to PATH when install
   - Windows: `python --version`
   - *nix (Linux, MacOS): `python3 --version`
@@ -36,7 +36,8 @@ ffmpeg: ```https://www.ffmpeg.org/download.html```
 - youtube_dl
 - python-dotenv
 - pynacl
+- gtts
 ## Note
-If you have problems with your bot, try downloading the latest release in the Releases tab and extract the zip file into your bot folder  
+If you have problems with your bot try updating to the latest release or DM me your issues via discord  
 ## Credit
-Creator: vietng322611 (Murasaki Rie)  
+Creator: vietng322611 (murasaki#1843)  
