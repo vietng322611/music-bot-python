@@ -1,5 +1,5 @@
 # This made by vietng322611, please be respect, don't copy it without permission, you can change the code inside into your own.
-# If something goes wrong, send me your log or try restarting the bot.
+# If something goes wrong, DM me your log or try restarting the bot.
 
 import modwall; modwall.check() # Library checker
 
@@ -39,9 +39,9 @@ queue = []
 queue_info = []
 banned_words_spam = {}
 creator = config["Creator_Id"]
-banned_words = ['lỏd', 'emotional damage', 'ì mâu sần nồ đam mẹt', 'ì mâu sần nồ đam mệt', 'emotional dâmge', 'sang chấn tâm lí', 'sang chấn tâm lý']
+banned_words = []
 
-async def voice_check(voice, channel):
+async def voice_check(voice, channel): # Check if only bot in voice channel
     member_count = len(channel.members)
     if member_count == 1:
         if voice.is_playing():
@@ -55,7 +55,7 @@ async def on_ready():
     print(f'Connected')
 
 @bot.event
-async def add_role(message):
+async def add_role(message): # Add mute role to user if they are spamming banned words
     member = message.author
     role = get(message.guild.roles, name = "Mute")
     return await member.add_roles(role)
@@ -69,7 +69,7 @@ async def on_message(message):
         for i in banned_words:
             if i in inp.lower():
                 await message.delete()
-                if message.author.id in banned_words_spam:
+                if message.author.id in banned_words_spam: # Check if user is using banned words
                     if banned_words_spam[message.author.id] > 4:
                         await add_role(message)
                         banned_words_spam[message.author.id] = 0
@@ -83,7 +83,7 @@ async def on_message(message):
     await bot.process_commands(message)
 
 @bot.event
-async def on_voice_state_update(member, before, after):
+async def on_voice_state_update(member, before, after): # Get voice status
     if member.name == bot.user.name:
         return
     elif bot.voice_clients != []:
@@ -94,9 +94,9 @@ async def on_voice_state_update(member, before, after):
                 await voice_check(voice, channel)
                 return
         else:
-          if after.channel.id == channel.id:
+          if after.channel.id == channel.id: # If someone joins the voice channel of the bot, bot will say somgthing, j4f
             if not voice.is_playing():
-              tts = gTTS(text="Ây thằng nhóc vừa vào mà không chào ai à", lang='vi')
+              tts = gTTS(text="", lang='vi')
               tts.save('gg.mp3')
               sleep(1)
               voice.play(discord.FFmpegPCMAudio('gg.mp3'))
