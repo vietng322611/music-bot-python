@@ -20,11 +20,12 @@ from gtts import gTTS
 from time import sleep
 
 config = json.load(open('./config.json'))
-if os.path.exists('logs'):
-    sys.stdout = logger(config)
-    sys.stderr = logger(config)
-else:
+if not os.path.exists('logs'):
     os.mkdir('logs')
+
+sys.stdout = logger(config)
+sys.stderr = logger(config)
+
 if config["Check_Update_On_Start"] == "True":
     update(config)
 
