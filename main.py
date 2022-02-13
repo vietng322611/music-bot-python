@@ -24,7 +24,7 @@ if not os.path.exists('logs'):
     os.mkdir('logs')
 
 sys.stdout = logger(config)
-sys.stderr = logger(config)
+sys.stderr.write = logger(config)
 
 if config["Check_Update_On_Start"] == "True":
     update(config)
