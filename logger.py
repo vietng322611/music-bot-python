@@ -13,8 +13,8 @@ class logger:
         text = text.rstrip()
         if text != '':
             try:
-                stdout.write(f"[{datetime.now().strftime('%H.%M.%S')}]" + ' %s\n' % (text))
-                self.log.write(f"[{datetime.now().strftime('%H.%M.%S')}]" + ' %s\n' % (text))
+                stdout.write('%s\n' % (text))
+                self.log.write('%s\n' % (text))
             except UnicodeEncodeError:
                 return
         return
