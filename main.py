@@ -89,16 +89,16 @@ async def on_voice_state_update(member, before, after): # Get voice status
     if member.name == bot.user.name:
         return
     elif bot.voice_clients != []:
-        voice = get(bot.voice_clients, guild=member.guild)
-        channel = bot.get_channel(voice.channel.id)
         if after.channel == None: 
+            voice = get(bot.voice_clients, guild=member.guild)
+            channel = bot.get_channel(voice.channel.id)
             if before.channel.id == channel.id:
                 await voice_check(voice, channel)
                 return
         else:
-          if after.channel.id == channel.id: # If someone joins the voice channel of the bot, bot will say somgthing, j4f
+          if before.channel == None and after.channel.id == channel.id: # If someone joins the voice channel of the bot, bot will say somgthing, j4f
             if not voice.is_playing():
-              tts = gTTS(text="Ây thằng nhóc vừa vào mà không chào ai à", lang='vi')
+              tts = gTTS(text="", lang='vi')
               tts.save('gg.mp3')
               sleep(1)
               voice.play(discord.FFmpegPCMAudio('gg.mp3'))
@@ -107,13 +107,11 @@ async def on_voice_state_update(member, before, after): # Get voice status
 @bot.event
 async def on_member_join(member):
   server = bot.get_server(member.server)
-  print(server)
   await get(server.text_channels, name='welcome').send(f"{member.name} has joined")
 
 @bot.event
 async def on_member_remove(member):
   server = bot.get_server(member.server)
-  print(server)
   await get(server.text_channels, name='welcome').send(f"{member.name} has leaved")
 
 @bot.command(name='banned-words', help='Show a list of banned words')
