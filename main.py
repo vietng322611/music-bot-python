@@ -41,7 +41,7 @@ queue = []
 queue_info = []
 banned_words_spam = {}
 creator = config["Creator_Id"]
-banned_words = ['lỏd', 'emotional damage', 'ì mâu sần nồ đam mẹt', 'ì mâu sần nồ đam mệt', 'emotional dâmge', 'sang chấn tâm lí', 'sang chấn tâm lý']
+banned_words = []
 
 async def voice_check(voice, channel): # Check if only bot in voice channel
     member_count = len(channel.members)
@@ -100,7 +100,7 @@ async def on_voice_state_update(member, before, after): # Get voice status
             if not voice.is_playing():
               tts = gTTS(text="", lang='vi')
               tts.save('gg.mp3')
-              sleep(1)
+              sleep(1.5)
               voice.play(discord.FFmpegPCMAudio('gg.mp3'))
               voice.source = discord.PCMVolumeTransformer(voice.source, volume=2.0)
               return
