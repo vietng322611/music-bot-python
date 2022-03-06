@@ -1,5 +1,6 @@
 from datetime import datetime
 from sys import stdout
+from sys import stderr
 
 class logger:
     def __init__(self, f):
@@ -13,7 +14,10 @@ class logger:
         text = text.rstrip()
         if text != '':
             try:
-                stdout.write('%s\n' % (text))
+                if stdout:
+                  stdout.write('%s\n' % (text))
+                elif stderr:
+                  stderr.write()
                 self.log.write('%s\n' % (text))
             except UnicodeEncodeError:
                 return
