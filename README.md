@@ -21,13 +21,20 @@ ffmpeg: ```https://www.ffmpeg.org/download.html```
 - Extract the zip file you have downloaded earlier and go to the folder you have extracted:
 - Here we have:
   - .env: Open this as notepad or your code editor and put your bot token here
-  - config.json: For prefix edit, add creator id, vocie greetting, tts command lang, banned words wordlist and update option
+  - config.json: Contains bot configuration
 - Modules install:
   - **Windows**: `pip install -r requirements.txt`
   - ***nix**: `python3 -m pip install -r requirements.txt`
 - Run bot:
   - **Windows**: `python bot.py`
   - ***nix**: `python3 bot.py`
+- How to use config file:
+  - "Check_Update_On_Start": Set this to False if you don't want to update
+  - "Prefix": Bot prefix, default is !!
+  - "Creator_Id": If you are the host, you should change this into yours
+  - "Banned_Words": Ban words word list
+  - "Voice_Greetting": Syntax: something %s something. %s is for the user name (required)
+  - "gg_Command_lang": For adjust language
 ##
 ## Libraries in use
 - beautifulsoup4
