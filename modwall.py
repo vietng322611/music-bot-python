@@ -1,10 +1,10 @@
 from pkg_resources import parse_requirements, parse_version, working_set
-
+import sys
 
 def print_help_and_exit():
     print("- Windows : py -m pip install --upgrade -r requirements.txt")
     print("- Unix : python3 -m pip install --upgrade -r requirements.txt")
-    exit()
+    sys.exit()
 
 def check_versions(installed_version, op, version):
     if (op == ">" and parse_version(installed_version) > parse_version(version)) \
