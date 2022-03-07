@@ -3,9 +3,9 @@
   "Log_Path": "./logs/",
   "Prefix": "!!",
   "Update_Url": "https://api.github.com/repos/vietng322611/music-bot-python/releases/latest",
-  "Update": "2.4.5",
-  "Creator_Id": 853514227738214421,
+  "Update": "2.4.6",
+  "Creator_Id": 0,
   "Banned_Words": [],
   "Voice_Greetting": "",
-  "gg_Command_lang": "en",
+  "gg_Command_lang": "en"
 }
