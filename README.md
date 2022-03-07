@@ -21,7 +21,7 @@ ffmpeg: ```https://www.ffmpeg.org/download.html```
 - Extract the zip file you have downloaded earlier and go to the folder you have extracted:
 - Here we have:
   - .env: Open this as notepad or your code editor and put your bot token here
-  - config.json: You can edit bot prefix, add creator id and choose update or not (very important if you have bad connection)
+  - config.json: For prefix edit, add creator id, vocie greetting, tts command lang, banned words wordlist and update option
 - Modules install:
   - **Windows**: `pip install -r requirements.txt`
   - ***nix**: `python3 -m pip install -r requirements.txt`
