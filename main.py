@@ -96,7 +96,7 @@ async def on_voice_state_update(member, before, after): # Get voice status
         else:
           if before.channel == None and after.channel.id == channel.id: # If someone joins the voice channel of the bot, bot will say somgthing, j4f
             if not voice.is_playing():
-              tts = gTTS(text=config["Voice_Greetting"], lang=config["gg_Command_lang"])
+              tts = gTTS(text=config["Voice_Greetting"] % member.name, lang=config["gg_Command_lang"])
               tts.save('gg.mp3')
               sleep(1.5)
               voice.play(discord.FFmpegPCMAudio('gg.mp3'))
