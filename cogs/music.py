@@ -8,7 +8,7 @@ from gtts import gTTS
 import asyncio
 
 class music(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot, config):
         self.bot = bot
         self.FFMPEG_OPTS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5','options': '-vn'}
         self.queue = []
@@ -18,6 +18,7 @@ class music(commands.Cog):
         self.thumbnails = []
         self.current_song = []
         self.task = []
+        self.config = config
 
     def create_queue(self, url, url2, title, user, thumbnail, avatar, duration):
         self.queue.append(url2)
@@ -297,7 +298,7 @@ class music(commands.Cog):
         await ctx.message.channel.send('Please switch to my current voice channel to use that')
         return
       if not voice.is_playing():
-        tts = gTTS(text=input, lang='vi')
+        tts = gTTS(text=input, lang=self.config["gg_Command_lang"])
         tts.save('gg.mp3')
         voice.play(FFmpegPCMAudio('gg.mp3'))
         voice.source = PCMVolumeTransformer(voice.source, volume=1.5)

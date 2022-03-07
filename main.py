@@ -33,13 +33,13 @@ TOKEN = os.getenv("BOT_TOKEN")
 intents = discord.Intents.default()
 intents.presences = True
 intents.members = True
-bot = commands.Bot(description="A simple bot made by vietng322611", command_prefix=config["Prefix"], intents=intents)
-bot.add_cog(music(bot))
+bot = commands.Bot(description="I'm a happy bot", command_prefix=config["Prefix"], intents=intents)
+bot.add_cog(music(bot, config))
 queue = []
 queue_info = []
 banned_words_spam = {}
 creator = config["Creator_Id"]
-banned_words = [""]
+banned_words = config["Banned_Words"]
 
 async def voice_check(voice, channel): # Check if only bot in voice channel
     member_count = len(channel.members)
@@ -96,7 +96,7 @@ async def on_voice_state_update(member, before, after): # Get voice status
         else:
           if before.channel == None and after.channel.id == channel.id: # If someone joins the voice channel of the bot, bot will say somgthing, j4f
             if not voice.is_playing():
-              tts = gTTS(text="", lang='vi')
+              tts = gTTS(text=config["Voice_Greetting"], lang=config["gg_Command_lang"])
               tts.save('gg.mp3')
               sleep(1.5)
               voice.play(discord.FFmpegPCMAudio('gg.mp3'))
