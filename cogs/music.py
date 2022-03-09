@@ -96,10 +96,10 @@ class music(commands.Cog):
             else:
                 await ctx.message.channel.send('Usage: !!play [url] or [name]')
             return
-        url = input.strip('!!play ')
-        url, url2, title, thumbnail_url, duration = url_exec.ytdl(url)
+        url = input.strip('!!play ') 
         channel = status.channel
         if voice != None:
+            url, url2, title, thumbnail_url, duration = url_exec.ytdl(url)
             if voice != channel:
                 await voice.move_to(channel)
         else:
