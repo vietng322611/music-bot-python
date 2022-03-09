@@ -16,6 +16,7 @@ from logger import logger
 from update import update
 from dotenv import load_dotenv
 from cogs.music import music
+from cogs.extent import extent
 from gtts import gTTS
 from time import sleep
 
@@ -35,6 +36,7 @@ intents.presences = True
 intents.members = True
 bot = commands.Bot(description="I'm a happy bot", command_prefix=config["Prefix"], intents=intents)
 bot.add_cog(music(bot, config))
+bot.add_cog(extent(bot, config))
 queue = []
 queue_info = []
 banned_words_spam = {}
