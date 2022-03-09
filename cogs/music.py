@@ -97,13 +97,13 @@ class music(commands.Cog):
                 await ctx.message.channel.send('Usage: !!play [url] or [name]')
             return
         url = input.strip('!!play ')
+        url, url2, title, thumbnail_url, duration = url_exec.ytdl(url)
         channel = status.channel
         if voice != None:
             if voice != channel:
                 await voice.move_to(channel)
         else:
             await channel.connect()
-        url, url2, title, thumbnail_url, duration = url_exec.ytdl(url)
         voice = ctx.voice_client
         if not voice.is_playing():
             self.create_queue(url, url2, title, ctx.author.name, thumbnail_url, ctx.author.avatar_url, duration)
