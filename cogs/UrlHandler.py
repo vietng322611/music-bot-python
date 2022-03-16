@@ -14,12 +14,12 @@ class url_exec():
     def ytdl(url):
         ydl_opts = {
             'format': 'bestaudio',
-            'noplaylist': 'True',
             'agelimit': '20',
             'default_search': 'auto',
             'audioformat': 'aac'
         }
         with youtubedl(ydl_opts) as ydl:
+            ydl._ies = [ydl.get_info_extractor('Youtube')]
             info = ydl.extract_info(url, download=False)
             if 'entries' in info:
                 url = info['entries'][-1]['webpage_url']
