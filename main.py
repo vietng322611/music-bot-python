@@ -28,7 +28,7 @@ sys.stdout = logger(config)
 if config["Check_Update_On_Start"] == "True":
     update(config)
 
-load_dotenv()
+load_dotenv('token.env')
 TOKEN = os.getenv("BOT_TOKEN")
 
 intents = discord.Intents.default()
