@@ -18,7 +18,10 @@ def update(config):
    elif update < latest_update:
       print(f'New update avalible: {latest_update}')
       print(f'Downloading update: {latest_update.strip("v")}')
-      package_url = response.json()["assets"][0]["browser_download_url"]
+      if os.path.exists("./main.exe"):
+         package_url = response.json()["assets"][0]["browser_download_url"]
+      else:
+         package_url = response.json()["assets"][1]["browser_download_url"]
       urllib.request.urlretrieve(package_url, "./bot-project.zip")
       with ZipFile("bot-project.zip", 'r') as zip:
          while zip.extractall("./"):
