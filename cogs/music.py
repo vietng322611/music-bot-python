@@ -96,7 +96,7 @@ class music(commands.Cog):
             else:
                 await ctx.message.channel.send('Usage: !!play [url] or [name]')
             return
-        url = input.strip('!!play ')
+        url = "".join(input.split("!!play "))
         channel = status.channel
         if voice != None:
             if voice != channel:
