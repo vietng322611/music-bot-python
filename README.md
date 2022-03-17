@@ -33,7 +33,7 @@ ffmpeg: ```https://www.ffmpeg.org/download.html```
   - "Prefix": Bot prefix, default is !!
   - "Creator_Id": If you are the host, you should change this into yours
   - "Banned_Words": Ban words word list
-  - "Voice_Greetting": Syntax: something %s something. %s is for the user name (required)
+  - "Voice_Greetting": Enter anything you want
   - "gg_Command_lang": For adjust language
 ##
 ## Libraries in use
