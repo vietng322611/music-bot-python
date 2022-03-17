@@ -15,14 +15,13 @@ class url_exec():
         ydl_opts = {
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
+                'preferredcodec': 'aac',
                 'preferredquality': '192',
             }],
             'format': 'bestaudio',
             'agelimit': '20',
             'noplaylist': 'True',
-            'default_search': 'auto',
-            'audioformat': 'aac'
+            'default_search': 'auto'
         }
         with youtubedl(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
