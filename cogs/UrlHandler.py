@@ -21,8 +21,8 @@ def search(opt, input):
         return res
 
 def ytdl(url):
-    if not url.startswith(('https://www.youtube.com/watch?v=', 'https://youtu.be/')):
-        url = 'https://www.youtube.com/watch?v=' + search('one', url)[0]
+    if not url.startswith(('https://www.youtube.com/watch?v=', 'https://youtu.be/', 'www.youtube.com/watch?v=', 'youtu.be/')):
+        url = 'https://www.youtube.com/' + search('one', url)[0]
     ydl_opts = {
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
