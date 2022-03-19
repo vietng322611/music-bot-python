@@ -2,7 +2,7 @@ from discord import FFmpegPCMAudio, PCMVolumeTransformer
 from discord.embeds import Embed
 from discord.colour import Color
 from discord.ext import commands
-from cogs.UrlHandler import url_exec
+from cogs.UrlHandler import *
 from gtts import gTTS
 
 import asyncio
@@ -103,7 +103,7 @@ class music(commands.Cog):
                 await voice.move_to(channel)
         else:
             await channel.connect()
-        url, url2, title, thumbnail_url, duration = url_exec.ytdl(url)
+        url, url2, title, thumbnail_url, duration = ytdl(url)
         voice = ctx.voice_client
         if not voice.is_playing():
             self.create_queue(url, url2, title, ctx.author.name, thumbnail_url, ctx.author.avatar_url, duration)
@@ -116,10 +116,10 @@ class music(commands.Cog):
     async def search(self, ctx):
         input = ctx.message.content
         input = input.strip('!!search ')
-        res = url_exec.request(input)
+        res = search('all', input)
         urls = ''
         for i in range(5):
-            urls += str(i) + ':' + url_exec.get_video_info('https://www.youtube.com/watch?v=' + res[i]) + '\n'
+            urls += str(i) + ':' +  get_video_info('https://www.youtube.com/watch?v=' + res[i]) + '\n'
         embed = Embed(title=f'**Result for "{input}"**', description=urls, color=Color.from_rgb(255, 0, 0))
         await ctx.message.channel.send(embed=embed)
         await ctx.message.channel.send('Please choose a song')
@@ -130,7 +130,7 @@ class music(commands.Cog):
             await ctx.message.channel.send('Canceled')
             return 'Cancled'
         url = 'https://www.youtube.com/watch?v=' + res[parameter]
-        url, url2, title, thumbnail_url, duration = url_exec.ytdl(url)
+        url, url2, title, thumbnail_url, duration = ytdl(url)
         await self.add_to_queue(ctx, url, url2, title, ctx.author.name, thumbnail_url, ctx.author.avatar_url, duration)
         voice = ctx.guild.voice_client 
         status = ctx.author.voice
@@ -157,7 +157,7 @@ class music(commands.Cog):
         elif voice == None or not voice.is_playing():
             await ctx.message.channel.send("I'm not playing anything")
             return
-        elif status.channel.id != voice.id:
+        elif status.channel.id != voice.channel.id:
             await ctx.message.channel.send('Please switch to my current voice channel to use that')
         elif self.queue != []:
             voice.stop()
