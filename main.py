@@ -90,7 +90,7 @@ async def on_voice_state_update(member, before, after): # Get voice status
         return
     elif bot.voice_clients != []:
         voice = get(bot.voice_clients, guild=member.guild)
-        channel = bot.get_channel(voice.channel.id)
+        channel = bot.get_channel(voice.id)
         if after.channel == None or after.channel != channel: 
             if before.channel.id == channel.id:
                 await voice_check(voice, channel)
