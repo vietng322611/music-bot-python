@@ -10,7 +10,9 @@ import asyncio
 class music(commands.Cog):
     def __init__(self, bot, config):
         self.bot = bot
-        self.FFMPEG_OPTS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5','options': '-vn'}
+        self.FFMPEG_OPTS = {'before_options': 
+        '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5 -headers "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0"', 
+        'options': '-vn'}
         self.queue = []
         self.titles = []
         self.url = []
