@@ -8,6 +8,7 @@ import os
 import json
 import discord
 
+from collections import defaultdict
 from discord.ext import commands
 from discord.utils import get
 from discord.embeds import Embed
@@ -19,6 +20,7 @@ from cogs.music import music
 from cogs.extent import extent
 from gtts import gTTS
 from time import sleep
+from datetime import datetime, timedelta
 
 config = json.load(open('./config.json'))
 if not os.path.exists('logs'):
@@ -39,7 +41,7 @@ bot.add_cog(music(bot, config))
 bot.add_cog(extent(bot, config))
 queue = []
 queue_info = []
-banned_words_spam = {}
+banned_words_spam = defaultdict(int)
 creator = config["Creator_Id"]
 banned_words = config["Banned_Words"]
 
@@ -69,18 +71,16 @@ async def on_message(message):
         return
     if message.author.id != creator:
         for i in banned_words:
-            if i in inp.lower():
+            if i + " " in inp.lower() or inp.lower() == i:
                 await message.delete()
-                if message.author.id in banned_words_spam: # Check if user is using banned words
-                    if banned_words_spam[message.author.id] > 4:
-                        await add_role(message)
-                        banned_words_spam[message.author.id] = 0
-                        return await message.channel.send(f'<@{message.author.id}> banned because of spamming, using banned words many times', delete_after=5)
-                    else:
-                        banned_words_spam[message.author.id] += 1
-                        return await message.channel.send(f"<@{message.author.id}> used banned word. Subsequent violations may be banned by creator.", delete_after=5)
+                if banned_words_spam[message.author.id] > 4:
+                    await message.author.timeout(datetime.now() + timedelta(minutes = 5))
+                    await message.channel.send(f"<@{message.author.id}> timed out user for 5 minutes for spamming banned word.", delete_after=5)
+                    banned_words_spam[message.author.id] = 0
+                    return
+
                 else:
-                    banned_words_spam.update({message.author.id : 1})
+                    banned_words_spam[message.author.id] += 1
                     return await message.channel.send(f"<@{message.author.id}> used banned word. Subsequent violations may be banned by creator.", delete_after=5)
     await bot.process_commands(message)
 
@@ -90,7 +90,7 @@ async def on_voice_state_update(member, before, after): # Get voice status
         return
     elif bot.voice_clients != []:
         voice = get(bot.voice_clients, guild=member.guild)
-        channel = bot.get_channel(voice.id)
+        channel = bot.get_channel(voice.channel.id)
         if after.channel == None or after.channel != channel: 
             if before.channel.id == channel.id:
                 await voice_check(voice, channel)
@@ -98,11 +98,11 @@ async def on_voice_state_update(member, before, after): # Get voice status
         else:
           if before.channel == None and after.channel.id == channel.id: # If someone joins the voice channel of the bot, bot will say somgthing, j4f
             if not voice.is_playing():
-              tts = gTTS(text=config["Voice_Greetting"], lang=config["gg_Command_lang"])
+              tts = gTTS(text=config["Voice_Greetting"].format(member.name), lang=config["gg_Command_lang"])
               tts.save('gg.mp3')
               sleep(1.5)
               voice.play(discord.FFmpegPCMAudio('gg.mp3'))
-              voice.source = discord.PCMVolumeTransformer(voice.source, volume=1.0)
+              voice.source = discord.PCMVolumeTransformer(voice.source, volume=2.0)
               return
 @bot.event
 async def on_member_join(member): #testing
