@@ -6,6 +6,8 @@ from cogs.UrlHandler import *
 from gtts import gTTS
 
 import asyncio
+import json
+import os
 
 class music(commands.Cog):
     def __init__(self, bot, config):
@@ -21,6 +23,11 @@ class music(commands.Cog):
         self.current_song = []
         self.task = []
         self.config = config
+        if not os.path.exists('./cogs/queues.json'):
+            os.mknod('./cogs/queues.json')
+            with open('./cogs/queues.json', 'w') as f:
+              json.dump({}, f, indent=2)
+        self.queues = json.load(open('./cogs/queues.json'))
 
     def create_queue(self, url, url2, title, user, thumbnail, avatar, duration):
         self.queue.append(url2)
@@ -60,7 +67,6 @@ class music(commands.Cog):
             await ctx.message.channel.send('Please enter a number')
         await commands.Cog.process_commands(ctx)
         return None
-
 
     async def playing(self, ctx, voice):
         if not voice.is_playing():
@@ -317,3 +323,61 @@ class music(commands.Cog):
         elif status.channel.id != voice.channel.id:
             await ctx.message.channel.send("I'm currently in a voice channel")
         return
+
+    @commands.command(name="qplay", aliases=['mp'], help='Play your queue')
+    async def qplay(self, ctx):
+        try:
+            queue = self.queues[str(ctx.author.id)]
+        except KeyError:
+            await ctx.message.channel.send('You have no queue, please create a queue first')
+            return
+        voice = ctx.voice_client
+        status = ctx.author.voice
+        if status == None:
+            return await ctx.message.channel.send('Please join a voice channel')
+        channel = status.channel
+        if voice != None:
+            if voice != channel:
+                await voice.move_to(channel)
+        else:
+            await channel.connect()
+        voice = ctx.voice_client
+        for url in queue:
+            url, url2, title, thumbnail_url, duration = ytdl(url)
+            self.create_queue(url, url2, title, ctx.author.name, thumbnail_url, ctx.author.avatar_url, duration)
+        if not voice.is_playing():
+            await self.playing(ctx, voice)
+
+    @commands.command(name="cqueue", aliases=['cq'], help='Create a queue')
+    async def cqueue(self, ctx):
+        input = ctx.message.content.replace('!!cqueue ', "")
+        if input == '':
+            await ctx.message.channel.send('Please enter something')
+            return
+        urls = input.split(",")
+        print(urls)
+        user = str(ctx.author.id)
+        if user in self.queues:
+            await ctx.message.channel.send('Do you want to create a new queue or add this to your current queue? (y/n)')
+            try:
+                parameter = await self.bot.wait_for("message", timeout=15)
+                if parameter.author == self.bot.user:
+                    return
+            except asyncio.TimeoutError:
+                await ctx.message.channel.send("I'll see it as no")
+                self.queues[user].append(urls)
+                await ctx.message.channel.send("Added to your current queue")
+                return
+            if parameter.content.lower() == 'y':
+                self.queues.update({user: urls})
+                await ctx.message.channel.send("I have created a new queue for you")
+                return
+            elif parameter.content.lower() == 'n':
+                self.queues[user].extend(urls)
+                json.dump(self.queues, open("./cogs/queues.json", "w"), indent = 2)
+                await ctx.message.channel.send("Added to your current queue")
+                return
+        self.queues.update({user: urls})
+        json.dump(self.queues, open("./cogs/queues.json", "w"), indent = 2)
+        await ctx.message.channel.send("I have created a new queue for you")
+            
