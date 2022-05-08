@@ -32,12 +32,25 @@ class music(commands.Cog):
         self.users.append(avatar)
         return
 
-    async def add_to_queue(self, ctx, url, url2, title, user, thumbnail, avatar, duration):
+    async def add_to_queue1(self, ctx, url, url2, title, user, thumbnail, avatar, duration):
         self.create_queue(url, url2, title, user, thumbnail, avatar, duration)
         embed = Embed(title="**Added To Queue**", color=Color.from_rgb(255, 0, 0))
         embed.add_field(name="**Song Name**", value=f"[{title}]({url})", inline=False)
         embed.add_field(name="**Song Length**", value=f"{duration}", inline=False)
         embed.set_thumbnail(url=thumbnail)
+        embed.set_footer(text=f"Requested by {user}", icon_url=avatar)
+        await ctx.message.channel.send(embed=embed)
+        return
+
+    async def add_to_queue2(self, ctx, url, url2, title, user, thumbnail, avatar, duration):
+        embed = Embed(title="**Added To Queue**", color=Color.from_rgb(255, 0, 0))
+        count = 0
+        songs = []
+        for i in range(len(url)):
+            self.create_queue(url[i], url2[i], title[i], user, thumbnail[i], avatar, duration[i])
+            songs += f'{count}: [{title[i]}]({url[i]})\n'
+            count += 1
+        embed.add_field(name="**Song Name**", value=songs, inline=False)
         embed.set_footer(text=f"Requested by {user}", icon_url=avatar)
         await ctx.message.channel.send(embed=embed)
         return
@@ -98,20 +111,35 @@ class music(commands.Cog):
             else:
                 await ctx.message.channel.send('Usage: !!play [url] or [name]')
             return
-        url = "".join(input.split("!!play "))
+        urls = input.replace("!!play", "").split(",")
         channel = status.channel
         if voice != None:
             if voice != channel:
                 await voice.move_to(channel)
         else:
             await channel.connect()
-        url, url2, title, thumbnail_url, duration = ytdl(url)
         voice = ctx.voice_client
-        if not voice.is_playing():
+        if len(urls) > 1:
+            url2s = titles = thumbnail_urls = durations = []
+            url, url2, title, thumbnail_url, duration = ytdl(urls[0])
             self.create_queue(url, url2, title, ctx.author.name, thumbnail_url, ctx.author.avatar_url, duration)
-            await self.playing(ctx, voice)
+            for i in range(1, len(urls)):
+                url, url2, title, thumbnail_url, duration = ytdl(urls[i])
+                self.create_queue(url, url2, title, ctx.author.name, thumbnail_url, ctx.author.avatar_url, duration)
+                url2s.append(url2)
+                titles.append(title)
+                thumbnail_urls.append(thumbnail_url)
+                durations.append(duration)
+            if not voice.is_playing():
+                await self.playing(ctx, voice)
+            await self.add_to_queue2(ctx, urls, url2s, titles, ctx.author.name, thumbnail_urls, ctx.author.avatar_url, durations)
         else:
-            await self.add_to_queue(ctx, url, url2, title, ctx.author.name, thumbnail_url, ctx.author.avatar_url, duration)
+            url, url2, title, thumbnail_url, duration = ytdl(i)
+            if not voice.is_playing():
+                self.create_queue(url, url2, title, ctx.author.name, thumbnail_url, ctx.author.avatar_url, duration)
+                await self.playing(ctx, voice)
+            else:
+                await self.add_to_queue1(ctx, url, url2, title, ctx.author.name, thumbnail_url, ctx.author.avatar_url, duration)
         return
 
     @commands.command(name='search', help='Search for a song on youtube', usage='[name]')
