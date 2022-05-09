@@ -2,7 +2,7 @@ from youtube_dl import YoutubeDL as youtubedl
 
 class musicQueue():
     def __init__(self, url, title, thumbnail_url):
-        self.url = url
+        self.url = url.strip()
         self.title = title
         self.thumbnail_url = thumbnail_url
 
@@ -22,4 +22,4 @@ class musicQueue():
             info = ydl.extract_info(self.url, download=False)
             url2 = info['url']
             duration = info['duration']
-        return ur2, duration
+        return url2, duration
