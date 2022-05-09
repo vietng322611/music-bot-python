@@ -4,7 +4,7 @@ class musicQueue():
     def __init__(self, url, title, thumbnail):
         self.url = url
         self.title = title
-        self.thumbnail = thumbnail
+        self.thumbnail_url = thumbnail
 
     def getPlayer(self):
         ydl_opts = {
