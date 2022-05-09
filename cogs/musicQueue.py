@@ -2,7 +2,7 @@ from youtube_dl import YoutubeDL as youtubedl
 
 class musicQueue():
     def __init__(self, url, title, thumbnail_url):
-        self.url = url.split()
+        self.url = url.strip()
         self.title = title
         self.thumbnail_url = thumbnail_url
 
