@@ -408,7 +408,7 @@ class music(commands.Cog):
         count = 0
         list_queue = ''
         for i in range(0, len(self.titles), 2):
-            list_queue += f'{count}: {musicQueue(**queue[i]).title}\n'
+            list_queue += f'{count}: {musicQueue(**queues[i]).title}\n'
             count += 1
         embed.add_field(name="Queued songs", value=list_queue, inline=False)
         return await ctx.message.channel.send(embed=embed)
