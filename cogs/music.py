@@ -350,7 +350,11 @@ class music(commands.Cog):
 
     @commands.command(name="cqueue", aliases=['cq'], help='Create a queue')
     async def cqueue(self, ctx):
-        input = ctx.message.content.replace('!!cqueue ', "").split(", ")
+        input = ctx.message.content
+        if "!!cq " in input:
+            input = input.replace('!!cq ', "").split(",")
+        elif "!!cqueue " in input:
+            input = input.replace('!!cqueue ', "").split(",")
         if input == '':
             await ctx.message.channel.send('Please enter something')
             return
@@ -424,13 +428,17 @@ class music(commands.Cog):
 
     @commands.command(name="a2queue", aliases=['aq'], help='Add a song to your queue')
     async def a2queue(self, ctx):
+        input = ctx.message.content
+        if "!!aq " in input:
+            input = input.replace('!!aq ', "").split(",")
+        elif "!!a2queue " in input:
+            input = input.replace('!!a2queue ', "").split(",")
         user = str(ctx.author.id)
         try:
             queue = pickle.load(open('./cogs/queues/' + user, 'rb'))
         except FileNotFoundError:
             await ctx.message.channel.send('You have no queue, please create a queue first')
             return
-        input = ctx.message.content.replace('!!a2queue ', "").split(", ")
         if input == '':
             await ctx.message.channel.send('Please enter something')
             return
