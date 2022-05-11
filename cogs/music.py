@@ -4,14 +4,13 @@ from discord.colour import Color
 from discord.ext import commands
 from cogs.UrlHandler import *
 from gtts import gTTS
-from urllib.parse import urlencode
 from cogs.musicQueue import musicQueue
 
 import asyncio
+import pickle
 import json
 import os
-import urllib.request
-import json
+import requests
 
 class music(commands.Cog):
     def __init__(self, bot, config):
@@ -27,11 +26,8 @@ class music(commands.Cog):
         self.current_song = []
         self.task = []
         self.config = config
-        if not os.path.exists('./cogs/queues.json'):
-            os.mknod('./cogs/queues.json')
-            with open('./cogs/queues.json', 'w') as f:
-              json.dump({}, f, indent=2)
-        self.queues = json.load(open('./cogs/queues.json'))
+        if not os.path.exists('./cogs/queues'):
+            os.mkdir('./cogs/queues')
 
     def create_queue(self, url, url2, title, user, thumbnail, avatar, duration):
         self.queue.append(url2)
@@ -331,8 +327,8 @@ class music(commands.Cog):
     @commands.command(name="qplay", aliases=['qp'], help='Play your queue')
     async def qplay(self, ctx):
         try:
-            queue = self.queues[str(ctx.author.id)]
-        except KeyError:
+           queue = pickle.load(open('./cogs/queues/' + str(ctx.author.id), 'rb'))
+        except FileNotFoundError:
             await ctx.message.channel.send('You have no queue, please create a queue first')
             return
         voice = ctx.voice_client
@@ -347,7 +343,6 @@ class music(commands.Cog):
             await channel.connect()
         voice = ctx.voice_client
         for url in queue:
-            url = musicQueue(**url)
             url2, duration = url.getPlayer()
             self.create_queue(url.url, url2, url.title, ctx.author.name, url.thumbnail_url, ctx.author.avatar_url, duration)
         if not voice.is_playing():
@@ -361,19 +356,15 @@ class music(commands.Cog):
             return
         urls = []
         for url in input:
-            params = {"format": "json", "url": "https://www.youtube.com/watch?v=%s" % re.search(r'(?<=v=)[^&]+', url).group(0)}
+            params = {"format": "json", "url": url}
             video = "https://www.youtube.com/oembed"
-            query_string = urlencode(params)
-            video = video + "?" + query_string
-
-            with urllib.request.urlopen(video) as response:
-                response_text = response.read()
-                data = json.loads(response_text.decode())
+            with requests.get(video, params=params) as response:
+                data = json.loads(response.text)
                 title = data['title']
                 thumbnail_url = data['thumbnail_url']
-            urls.append(musicQueue(url, title, thumbnail_url).__dict__)
+            urls.append(musicQueue(url, title, thumbnail_url))
         user = str(ctx.author.id)
-        if user in self.queues:
+        if os.path.exists('./cogs/queues/' + user):
             await ctx.message.channel.send('Do you want to create a new queue or add this to your current queue? (y/n)')
             try:
                 parameter = await self.bot.wait_for("message", timeout=15)
@@ -381,55 +372,62 @@ class music(commands.Cog):
                     return
             except asyncio.TimeoutError:
                 await ctx.message.channel.send("I'll see it as no")
-                self.queues[user].extend(urls)
+                with open('./cogs/queues/' + user, 'rb') as f:
+                    queue = pickle.load(f)
+                    queue.extend(urls)
+                with open('./cogs/queues/' + user, 'wb') as f:
+                    pickle.dump(queue, f)
                 await ctx.message.channel.send("Added to your current queue")
-                return
             if parameter.content.lower() == 'y':
-                self.queues.update({user: urls})
+                with open("./cogs/queues/" + user, "wb") as f:
+                    pickle.dump(urls, f)
                 await ctx.message.channel.send("I have created a new queue for you")
-                return
             elif parameter.content.lower() == 'n':
-                self.queues[user].extend(urls)
-                json.dump(self.queues, open("./cogs/queues.json", "w"), indent = 2)
+                with open('./cogs/queues/' + user, 'rb') as f:
+                    queue = pickle.load(f)
+                    queue.extend(urls)
+                with open('./cogs/queues/' + user, 'wb') as f:
+                    pickle.dump(queue, f)
                 await ctx.message.channel.send("Added to your current queue")
-                return
-        self.queues.update({user: urls})
-        json.dump(self.queues, open("./cogs/queues.json", "w"), indent = 2)
+        else:
+            with open("./cogs/queues/" + user, "wb") as f:
+                pickle.dump(urls, f)
         await ctx.message.channel.send("I have created a new queue for you")
 
     @commands.command(name="lqueue", aliases=['lq'], help='List your queue')
     async def lqueue(self, ctx):
         try:
-            queue = self.queues[str(ctx.author.id)]
-        except KeyError:
+           queue = pickle.load(open('./cogs/queues/' + str(ctx.author.id), 'rb'))
+        except FileNotFoundError:
             await ctx.message.channel.send('You have no queue, please create a queue first')
             return
         embed = Embed(color = Color.from_rgb(255, 0, 0))
         count = 0
         list_queue = ''
-        for i in range(0, len(self.titles), 2):
-            list_queue += f'{count}: {musicQueue(**queues[i]).title}\n'
+        for song in queue:
+            list_queue += f'{count}: {song.title}\n'
             count += 1
         embed.add_field(name="Queued songs", value=list_queue, inline=False)
         return await ctx.message.channel.send(embed=embed)
 
-    @commands.command(name="delqueue", aliases=['dq'], help='Delete your queue')
+    @commands.command(name="dqueue", aliases=['dq'], help='Delete your queue')
     async def delqueue(self, ctx):
         try:
-            queue = self.queues[str(ctx.author.id)]
-        except KeyError:
+            queue = pickle.load(open('./cogs/queues/' + str(ctx.author.id), 'rb'))
+        except FileNotFoundError:
             await ctx.message.channel.send('You have no queue, please create a queue first')
             return
-        self.queues[str(ctx.author.id)] = []
-        json.dump(self.queues, open("./cogs/queues.json", "w"), indent = 2)
+        queue = []
+        pickle.dump(queue, open('./cogs/queues/' + str(ctx.author.id), 'wb'))
         await ctx.message.channel.send("Deleted")
         return
 
     @commands.command(name="a2queue", aliases=['aq'], help='Add a song to your queue')
     async def a2queue(self, ctx):
+        user = str(ctx.author.id)
         try:
-            queue = self.queues[str(ctx.author.id)]
-        except KeyError:
+            queue = pickle.load(open('./cogs/queues/' + user, 'rb'))
+        except FileNotFoundError:
             await ctx.message.channel.send('You have no queue, please create a queue first')
             return
         input = ctx.message.content.replace('!!a2queue ', "").split(", ")
@@ -438,17 +436,16 @@ class music(commands.Cog):
             return
         urls = []
         for url in input:
-            params = {"format": "json", "url": "https://www.youtube.com/watch?v=%s" % re.search(r'(?<=v=)[^&]+', url).group(0)}
+            params = {"format": "json", "url": url}
             video = "https://www.youtube.com/oembed"
-            query_string = urlencode(params)
-            video = video + "?" + query_string
-
-            with urllib.request.urlopen(video) as response:
-                response_text = response.read()
-                data = json.loads(response_text.decode())
+            with requests.get(video, params=params) as response:
+                data = json.loads(response.text)
                 title = data['title']
                 thumbnail_url = data['thumbnail_url']
             urls.append(musicQueue(url, title, thumbnail_url).__dict__)
-        self.queues[str(ctx.author.id)].extend(urls)
-        json.dump(self.queues, open("./cogs/queues.json", "w"), indent = 2)
-        await ctx.message.channel.send("Added to your queue")
+        with open('./cogs/queues/' + user, 'rb') as f:
+            queue = pickle.load(f)
+            queue.extend(urls)
+        with open('./cogs/queues/' + user, 'wb') as f:
+            pickle.dump(queue, f)
+        await ctx.message.channel.send("Added to your current queue")
