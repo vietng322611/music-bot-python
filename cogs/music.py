@@ -445,7 +445,7 @@ class music(commands.Cog):
         if len(args) == 0:
             await ctx.message.channel.send(
                 'options: \n'
-                + '1: delete song(s) at position x (to y)\n'
+                + '1: delete song(s) at position x\n'
                 + '2: add a song (at position x (x <= last position + 1))\n'
                 + '3: move song position from x to y\n'
             )
@@ -454,7 +454,7 @@ class music(commands.Cog):
         if opt < 1 or opt > 3:
             await ctx.message.channel.send(
                 'options: \n'
-                + '1: delete song(s) at position x (to y)\n'
+                + '1: delete song(s) at position x\n'
                 + '2: add a song (at position x (x <= last position + 1))\n'
                 + '3: edit song(s) position from x to y\n'
             )
@@ -470,9 +470,11 @@ class music(commands.Cog):
             if len(args) < 2:
                 await ctx.message.channel.send('Please enter the position you want to delete from')
                 return
+            try: pos = int(args[1])
+            except ValueError:
+                await ctx.message.channel.send('Please enter a number')
             if len(args) > 3:
-                await ctx.message.channel.send('Too much arguments so i only take the first two')
-            pos = args[1]
+                await ctx.message.channel.send('Too much arguments so i only take the first one')
             if 0 <= pos < len(queue):
                 queue.pop(pos)
                 with open('./cogs/queues/' + user, 'wb') as f:
@@ -515,11 +517,9 @@ class music(commands.Cog):
                 return
             if len(args) > 3:
                 await ctx.message.channel.send('Too much arguments so i only take the first two')
-            pos1 = args[1]
-            pos2 = args[2]
             try:
-                pos1 = int(pos1)
-                pos2 = int(pos2)
+                pos1 = int(args[1])
+                pos2 = int(args[2])
             except ValueError:
                 await ctx.message.channel.send("Please enter a number")
             if 0 <= pos1 < len(queue) and pos2 <= len(queue):
