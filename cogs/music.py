@@ -487,19 +487,25 @@ class music(commands.Cog):
             if len(args) <= 3:
                 additional = args[1]
                 pos = len(queue)
-                if not additional.startswith('https://www.youtube.com/watch?v=') or not additional.startswith('https://youtu.be/'):
+                if not additional.startswith('https://www.youtube.com') and not additional.startswith('https://youtu.be'):
                     await ctx.message.channel.send('Please enter a valid url')
                     return
             if len(args) == 3:
-                pos = args[2]
-                if not additional.isdigit() or pos > len(queue):
+                if not args[2].isdigit():
                     await ctx.message.channel.send('Please enter a valid position')
                     return
+                elif int(args[2]) > len(queue):
+                    await ctx.message.channel.send('Please enter a valid position')
+                    return
+                pos = int(args[2])
             if len(args) > 3:
-                pos = args[2]
-                if not additional.isdigit() or pos > len(queue):
+                if not args[2].isdigit():
                     await ctx.message.channel.send('Please enter a valid position')
                     return
+                elif int(args[2]) > len(queue):
+                    await ctx.message.channel.send('Please enter a valid position')
+                    return
+                pos = int(args[2])
                 await ctx.message.channel.send('Too much arguments so i only take the first two')
             params = {"format": "json", "url": additional}
             video = "https://www.youtube.com/oembed"
