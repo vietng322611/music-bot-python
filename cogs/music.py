@@ -37,7 +37,6 @@ class music(commands.Cog):
         self.thumbnails.append(thumbnail)
         self.users.append(user)
         self.users.append(avatar)
-        return
 
     async def add_to_queue(self, ctx, url, url2, title, user, thumbnail, avatar, duration):
         self.create_queue(url, url2, title, user, thumbnail, avatar, duration)
@@ -47,7 +46,6 @@ class music(commands.Cog):
         embed.set_thumbnail(url=thumbnail)
         embed.set_footer(text=f"Requested by {user}", icon_url=avatar)
         await ctx.message.channel.send(embed=embed)
-        return
 
     async def get_message(self, ctx, user):
         try:
@@ -69,31 +67,28 @@ class music(commands.Cog):
         return None
 
     async def playing(self, ctx, voice):
-        if not voice.is_playing():
-            if self.queue != []:
-                title = self.titles.pop(0)
-                url = self.url.pop(0)
-                duration = self.titles.pop(0)
-                self.current_song = [title, duration]
-                loop = asyncio.get_event_loop()
-                embed = Embed(title="**Now Playing**", color=Color.from_rgb(255, 0, 0))
-                embed.add_field(name="**Song Name**", value=f"[{title}]({url})", inline=False)
-                embed.add_field(name="**Song Length**", value=f"{duration}", inline=False)
-                embed.set_thumbnail(url=self.thumbnails.pop(0))
-                embed.set_footer(text=f"Requested by {self.users.pop(0)}", icon_url=self.users.pop(0))
-                voice.play(FFmpegPCMAudio(self.queue.pop(0), **self.FFMPEG_OPTS), after=lambda x=None: self.task.append(loop.create_task(self.playing(ctx, voice))))
-                voice.source = PCMVolumeTransformer(voice.source, volume=1.0)
-                await ctx.send(embed=embed)
-        return
+        if not voice.is_playing() and not voice.is_paused() and self.queue != []:
+            title = self.titles.pop(0)
+            url = self.url.pop(0)
+            duration = self.titles.pop(0)
+            self.current_song = [title, duration]
+            loop = asyncio.get_event_loop()
+            embed = Embed(title="**Now Playing**", color=Color.from_rgb(255, 0, 0))
+            embed.add_field(name="**Song Name**", value=f"[{title}]({url})", inline=False)
+            embed.add_field(name="**Song Length**", value=f"{duration}", inline=False)
+            embed.set_thumbnail(url=self.thumbnails.pop(0))
+            embed.set_footer(text=f"Requested by {self.users.pop(0)}", icon_url=self.users.pop(0))
+            voice.play(FFmpegPCMAudio(self.queue.pop(0), **self.FFMPEG_OPTS), after=lambda x=None: self.task.append(loop.create_task(self.playing(ctx, voice))))
+            voice.source = PCMVolumeTransformer(voice.source, volume=1.0)
+            await ctx.send(embed=embed)
 
     @commands.command(name='play', aliases=['p'],help='Play song from url', usage='[url or name]')
-    async def play(self, ctx):
-        input = ctx.message.content
+    async def play(self, ctx, url: str):
         voice = ctx.voice_client
         status = ctx.author.voice
         if status == None:
             return await ctx.message.channel.send('Please join a voice channel')
-        if input == '!!play' or input == '!!p':
+        if url == '':
             if self.queue != []:
                 if voice != None:
                     await self.playing(ctx, voice)
@@ -104,7 +99,6 @@ class music(commands.Cog):
             else:
                 await ctx.message.channel.send('Usage: !!play [url] or [name]')
             return
-        url = "".join(input.split("!!play "))
         channel = status.channel
         if voice != None:
             if voice != channel:
@@ -118,17 +112,19 @@ class music(commands.Cog):
             await self.playing(ctx, voice)
         else:
             await self.add_to_queue(ctx, url, url2, title, ctx.author.name, thumbnail_url, ctx.author.avatar_url, duration)
-        return
 
+    @play.error
+    async def play_error(e, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send("Please enter a url or name")
+    
     @commands.command(name='search', help='Search for a song on youtube', usage='[name]')
-    async def search(self, ctx):
-        input = ctx.message.content
-        input = input.strip('!!search ')
-        res = search('all', input)
+    async def search(self, ctx, name: str):
+        res = search('all', name)
         urls = ''
         for i in range(5):
             urls += str(i) + ':' +  get_video_info('https://www.youtube.com/watch?v=' + res[i]) + '\n'
-        embed = Embed(title=f'**Result for "{input}"**', description=urls, color=Color.from_rgb(255, 0, 0))
+        embed = Embed(title=f'**Result for "{name}"**', description=urls, color=Color.from_rgb(255, 0, 0))
         await ctx.message.channel.send(embed=embed)
         await ctx.message.channel.send('Please choose a song')
         parameter = None
@@ -153,8 +149,12 @@ class music(commands.Cog):
         voice = ctx.voice_client
         if not voice.is_playing():
             await self.playing(ctx, voice)
-        return
-    
+
+    @search.error
+    async def search_error(e, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send("Please enter a name")
+
     @commands.command(name='skip', help='Skip to next song in queue')
     async def skip(self, ctx):
         voice = ctx.voice_client
@@ -173,11 +173,9 @@ class music(commands.Cog):
             return
         else:
             await ctx.message.channel.send('No song left')
-        return
 
     @commands.command(name='vol', help='Change commands volume', usage='!!vol [number from 1 to 100]')
-    async def volume(self, ctx):
-        input = ctx.message.content.strip('!!vol ')
+    async def volume(self, ctx, volume: int):
         voice = ctx.voice_client
         status = ctx.author.voice
         if status == None:
@@ -188,40 +186,41 @@ class music(commands.Cog):
             return
         elif status.channel.id != voice.channel.id:
             await ctx.message.channel.send('Please switch to my current voice channel to use that')
-        try:
-            input = float(input)
-        except ValueError:
+        if volume < 0 or volume > 200:
             await ctx.message.channel.send('Please enter a number from 0 to 200')
             return
-        if input < 0 or input > 200:
-            await ctx.message.channel.send('Please enter a number from 0 to 200')
-            return
-        volume = input / 100
+        volume = volume / 100
         voice.source.volume = volume
-        return await ctx.message.channel.send(f'**Volume changed to** {int(input)}/200')
+        return await ctx.message.channel.send(f'**Volume changed to** {int(volume)}/200')
+
+    @volume.error
+    async def volume_error(e, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send("Please enter a number")
+        if isinstance(error, commands.BadArgument):
+            await ctx.send("Please enter a number")
 
     @commands.command(name='delete', aliases=['d', 'del'],help='Delete a song from queue', usage='[song index]')
-    async def delete(self, ctx):
-        input = ctx.message.content
-        pos = input.strip('!!delete ')
-        if pos.isalnum:
-            pos = int(pos)
-        else:
-            await ctx.message.channel.send('Please enter a number')
-            return
-        try:
-            self.queue.pop(pos)
-            self.titles.pop(pos)
-            self.titles.pop(pos)
-            self.url.pop(pos)
-            self.thumbnails.pop(pos)
-            self.users.pop(pos)
-            self.users.pop(pos)
+    async def delete(self, ctx, idx: int):
+        if 0 <= idx < len(self.queue):
+            self.queue.pop(idx)
+            self.titles.pop(idx)
+            self.titles.pop(idx)
+            self.url.pop(idx)
+            self.thumbnails.pop(idx)
+            self.users.pop(idx)
+            self.users.pop(idx)
             await ctx.message.channel.send('Deleted from queue')
-        except:
+        else:
             await ctx.message.channel.send('Out of range')
-        return
 
+    @delete.error
+    async def delete_error(e, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send("Please enter song index")
+        if isinstance(error, commands.BadArgument):
+            await ctx.send("Please enter a number")
+        
     @commands.command(name='queue', help='Show current songs in queue')
     async def show_queue(self, ctx):
         voice = ctx.voice_client
@@ -262,7 +261,6 @@ class music(commands.Cog):
             else:
                 voice.resume()
                 await ctx.message.channel.send('Player resumed')
-        return
     
     @commands.command(name='stop', aliases=['leave'], help='Stop the current song and clear the queue')
     async def stop(self, ctx):
@@ -286,31 +284,31 @@ class music(commands.Cog):
             voice.cleanup()
             await voice.disconnect()
             await ctx.message.channel.send("I've leaved the voice channel")
-        return
     
     @commands.command(name='gg', aliases=['g'], help='Text to speech')
-    async def gg(self, ctx):
-      input = ctx.message.content.strip('!!gg ')
-      if input == '':
-        await ctx.message.channel.send('Please enter something')
-        return
-      voice = ctx.voice_client
-      status = ctx.author.voice
-      if status == None:
-        await ctx.message.channel.send('Please join a voice channel')
-        return
-      elif voice == None:
-        await status.channel.connect()
+    async def gg(self, ctx, text: str):
         voice = ctx.voice_client
-      elif status.channel.id != voice.channel.id:
-        await ctx.message.channel.send('Please switch to my current voice channel to use that')
-        return
-      if not voice.is_playing():
-        tts = gTTS(text=input, lang=self.config["gg_Command_lang"])
-        tts.save('gg.mp3')
-        voice.play(FFmpegPCMAudio('gg.mp3'))
-        voice.source = PCMVolumeTransformer(voice.source, volume=1.5)
-      return
+        status = ctx.author.voice
+        if status == None:
+            await ctx.message.channel.send('Please join a voice channel')
+            return
+        elif voice == None:
+            await status.channel.connect()
+            voice = ctx.voice_client
+        elif status.channel.id != voice.channel.id:
+            await ctx.message.channel.send('Please switch to my current voice channel to use that')
+            return
+        if not voice.is_playing():
+            tts = gTTS(text=text, lang=self.config["gg_Command_lang"])
+            tts.save('gg.mp3')
+            voice.play(FFmpegPCMAudio('gg.mp3'))
+            voice.source = PCMVolumeTransformer(voice.source, volume=1.5)
+
+    @gg.error
+    async def gg_error(e, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.message.channel.send('Please enter something')
+            return
 
     @commands.command(name='join', help='Make bot join a vocie channel')
     async def join(self, ctx):
@@ -322,7 +320,6 @@ class music(commands.Cog):
             await status.channel.connect()
         elif status.channel.id != voice.channel.id:
             await ctx.message.channel.send("I'm currently in a voice channel")
-        return
 
     @commands.command(name="qplay", aliases=['qp'], help='Play your queue')
     async def qplay(self, ctx):
@@ -349,53 +346,32 @@ class music(commands.Cog):
             await self.playing(ctx, voice)
 
     @commands.command(name="cqueue", aliases=['cq'], help='Create a queue')
-    async def cqueue(self, ctx):
-        input = ctx.message.content
-        if "!!cq " in input:
-            input = input.replace('!!cq ', "").split(",")
-        elif "!!cqueue " in input:
-            input = input.replace('!!cqueue ', "").split(",")
-        if input == '':
-            await ctx.message.channel.send('Please enter something')
+    async def cqueue(self, ctx, *urls: str):
+        if len(urls) == 0:
+            await ctx.message.channel.send('Please enter a url')
             return
-        urls = []
-        for url in input:
+        obj = []
+        for url in urls:
             params = {"format": "json", "url": url}
             video = "https://www.youtube.com/oembed"
             with requests.get(video, params=params) as response:
                 data = json.loads(response.text)
                 title = data['title']
                 thumbnail_url = data['thumbnail_url']
-            urls.append(musicQueue(url, title, thumbnail_url))
+            obj.append(musicQueue(url, title, thumbnail_url))
         user = str(ctx.author.id)
         if os.path.exists('./cogs/queues/' + user):
-            await ctx.message.channel.send('Do you want to create a new queue or add this to your current queue? (y/n)')
+            await ctx.message.channel.send('You already have a queue, do you want to overwrite it? (y/n)')
             try:
-                parameter = await self.bot.wait_for("message", timeout=15)
-                if parameter.author == self.bot.user:
-                    return
+                msg = await self.bot.wait_for('message', check=lambda m: m.author == ctx.author and m.channel == ctx.message.channel, timeout=15.0)
             except asyncio.TimeoutError:
-                await ctx.message.channel.send("I'll see it as no")
-                with open('./cogs/queues/' + user, 'rb') as f:
-                    queue = pickle.load(f)
-                    queue.extend(urls)
-                with open('./cogs/queues/' + user, 'wb') as f:
-                    pickle.dump(queue, f)
-                await ctx.message.channel.send("Added to your current queue")
-            if parameter.content.lower() == 'y':
-                with open("./cogs/queues/" + user, "wb") as f:
-                    pickle.dump(urls, f)
-                await ctx.message.channel.send("I have created a new queue for you")
-            elif parameter.content.lower() == 'n':
-                with open('./cogs/queues/' + user, 'rb') as f:
-                    queue = pickle.load(f)
-                    queue.extend(urls)
-                with open('./cogs/queues/' + user, 'wb') as f:
-                    pickle.dump(queue, f)
-                await ctx.message.channel.send("Added to your current queue")
-        else:
-            with open("./cogs/queues/" + user, "wb") as f:
-                pickle.dump(urls, f)
+                await ctx.message.channel.send('You took too long, cancelling')
+                return
+            if msg.content.lower() == 'n':
+                await ctx.message.channel.send('Cancelling')
+                return
+        with open("./cogs/queues/" + user, "wb") as f:
+            pickle.dump(obj, f)
         await ctx.message.channel.send("I have created a new queue for you")
 
     @commands.command(name="lqueue", aliases=['lq'], help='List your queue')
@@ -422,38 +398,134 @@ class music(commands.Cog):
             await ctx.message.channel.send('You have no queue, please create a queue first')
             return
         queue = []
+        await ctx.message.channel.send('You will delete your whole queue, continue at your own risk? (y/n)')
+        msg = await self.bot.wait_for('message', check=lambda m: m.author == ctx.author and m.channel == ctx.message.channel, timeout=15.0)
+        if msg.content.lower() == 'n':
+            await ctx.message.channel.send('Cancelling')
+            return
         pickle.dump(queue, open('./cogs/queues/' + str(ctx.author.id), 'wb'))
         await ctx.message.channel.send("Deleted")
-        return
 
-    @commands.command(name="a2queue", aliases=['aq'], help='Add a song to your queue')
-    async def a2queue(self, ctx):
-        input = ctx.message.content
-        if "!!aq " in input:
-            input = input.replace('!!aq ', "").split(",")
-        elif "!!a2queue " in input:
-            input = input.replace('!!a2queue ', "").split(",")
+    @commands.command(name="a2queue", aliases=['aq'], help='Add song(s) to your queue')
+    async def a2queue(self, ctx, *urls: str):
+        urls = urls.split(',')
         user = str(ctx.author.id)
         try:
             queue = pickle.load(open('./cogs/queues/' + user, 'rb'))
         except FileNotFoundError:
             await ctx.message.channel.send('You have no queue, please create a queue first')
             return
-        if input == '':
+        if urls == ['']:
             await ctx.message.channel.send('Please enter something')
             return
-        urls = []
-        for url in input:
+        obj = []
+        for url in urls:
             params = {"format": "json", "url": url}
             video = "https://www.youtube.com/oembed"
             with requests.get(video, params=params) as response:
                 data = json.loads(response.text)
                 title = data['title']
                 thumbnail_url = data['thumbnail_url']
-            urls.append(musicQueue(url, title, thumbnail_url).__dict__)
+            obj.append(musicQueue(url, title, thumbnail_url))
         with open('./cogs/queues/' + user, 'rb') as f:
             queue = pickle.load(f)
-            queue.extend(urls)
+            queue.extend(obj)
         with open('./cogs/queues/' + user, 'wb') as f:
             pickle.dump(queue, f)
         await ctx.message.channel.send("Added to your current queue")
+
+    @a2queue.error
+    async def a2queue_error(e, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.message.channel.send('Please enter a url')
+
+    @commands.command(name="equeue", aliases=['eq'], help='Edit your queue')
+    async def equeue(self, ctx, *args: str):
+        user = str(ctx.author.id)
+        if len(args) == 0:
+            await ctx.message.channel.send(
+                'options: \n'
+                + '1: delete song(s) at position x (to y)\n'
+                + '2: add a song (at position x (x <= last position + 1))\n'
+                + '3: move song position from x to y\n'
+            )
+            return
+        opt = int(args[0])
+        if opt < 1 or opt > 3:
+            await ctx.message.channel.send(
+                'options: \n'
+                + '1: delete song(s) at position x (to y)\n'
+                + '2: add a song (at position x (x <= last position + 1))\n'
+                + '3: edit song(s) position from x to y\n'
+            )
+        if len(args) < 3:
+            if opt == 3:
+                await ctx.message.channel.send('Please enter the position you want to move to')
+        try:
+            queue = pickle.load(open('./cogs/queues/' + user, 'rb'))
+        except FileNotFoundError:
+            await ctx.message.channel.send('You have no queue, please create a queue first')
+            return
+        if opt == 1:
+            if len(args) < 2:
+                await ctx.message.channel.send('Please enter the position you want to delete from')
+                return
+            if len(args) > 3:
+                await ctx.message.channel.send('Too much arguments so i only take the first two')
+            pos = args[1]
+            if 0 <= pos < len(queue):
+                queue.pop(pos)
+                with open('./cogs/queues/' + user, 'wb') as f:
+                    pickle.dump(queue, f)
+                await ctx.message.channel.send("Deleted")
+            else:
+                await ctx.message.channel.send("Position out of range")
+            return
+        if opt == 2:
+            if len(args) <= 3:
+                additional = args[1]
+                pos = len(queue)
+                if not additional.startswith('https://www.youtube.com/watch?v=') or not additional.startswith('https://youtu.be/'):
+                    await ctx.message.channel.send('Please enter a valid url')
+                    return
+            if len(args) == 3:
+                pos = args[2]
+                if not additional.isdigit() or pos > len(queue):
+                    await ctx.message.channel.send('Please enter a valid position')
+                    return
+            if len(args) > 3:
+                pos = args[2]
+                if not additional.isdigit() or pos > len(queue):
+                    await ctx.message.channel.send('Please enter a valid position')
+                    return
+                await ctx.message.channel.send('Too much arguments so i only take the first two')
+            params = {"format": "json", "url": additional}
+            video = "https://www.youtube.com/oembed"
+            with requests.get(video, params=params) as response:
+                data = json.loads(response.text)
+                title = data['title']
+                thumbnail_url = data['thumbnail_url']
+            queue.insert(pos, musicQueue(additional, title, thumbnail_url))
+            with open('./cogs/queues/' + user, 'wb') as f:
+                pickle.dump(queue, f)
+            await ctx.message.channel.send("Added to your queue")
+        if opt == 3:
+            if len(args) < 3:
+                await ctx.message.channel.send('Please enter the position you want to move from and to')
+                return
+            if len(args) > 3:
+                await ctx.message.channel.send('Too much arguments so i only take the first two')
+            pos1 = args[1]
+            pos2 = args[2]
+            try:
+                pos1 = int(pos1)
+                pos2 = int(pos2)
+            except ValueError:
+                await ctx.message.channel.send("Please enter a number")
+            if 0 <= pos1 < len(queue) and pos2 <= len(queue):
+                queue.insert(pos2, queue.pop(pos))
+                with open('./cogs/queues/' + user, 'wb') as f:
+                    pickle.dump(queue, f)
+                await ctx.message.channel.send("Edited")
+            else:
+                await ctx.message.channel.send("Position out of range")
