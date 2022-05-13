@@ -103,11 +103,10 @@ class music(commands.Cog):
             await self.add_to_queue(ctx, url, url2, title, ctx.author.name, thumbnail_url, ctx.author.avatar_url, duration)
 
     @play.error
-    async def play_error(e, ctx, error):
+    async def play_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
             voice = ctx.voice_client
             status = ctx.author.voice
-            self = self
             if self.queue != []:
                 if voice != None:
                     await self.playing(ctx, voice)
@@ -152,7 +151,7 @@ class music(commands.Cog):
             await self.playing(ctx, voice)
 
     @search.error
-    async def search_error(e, ctx, error):
+    async def search_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send("Please enter a name")
 
@@ -195,7 +194,7 @@ class music(commands.Cog):
         return await ctx.message.channel.send(f'**Volume changed to** {int(volume)}/200')
 
     @volume.error
-    async def volume_error(e, ctx, error):
+    async def volume_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send("Please enter a number")
         if isinstance(error, commands.BadArgument):
@@ -216,7 +215,7 @@ class music(commands.Cog):
             await ctx.message.channel.send('Out of range')
 
     @delete.error
-    async def delete_error(e, ctx, error):
+    async def delete_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send("Please enter song index")
         if isinstance(error, commands.BadArgument):
@@ -306,7 +305,7 @@ class music(commands.Cog):
             voice.source = PCMVolumeTransformer(voice.source, volume=1.5)
 
     @gg.error
-    async def gg_error(e, ctx, error):
+    async def gg_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.message.channel.send('Please enter something')
             return
@@ -436,7 +435,7 @@ class music(commands.Cog):
         await ctx.message.channel.send("Added to your current queue")
 
     @a2queue.error
-    async def a2queue_error(e, ctx, error):
+    async def a2queue_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.message.channel.send('Please enter a url')
 
