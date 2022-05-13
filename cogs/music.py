@@ -49,9 +49,7 @@ class music(commands.Cog):
 
     async def get_message(self, ctx, user):
         try:
-            parameter = await self.bot.wait_for("message", timeout=15)
-            if parameter.author == self.bot.user:
-                return None
+            parameter = await self.bot.wait_for('message', check=lambda m: m.author == ctx.author and m.channel == ctx.message.channel, timeout=15.0)
         except asyncio.TimeoutError:
             await ctx.channel.send("Sorry, you didn't reply in time!")
             return "cancel"
@@ -83,7 +81,7 @@ class music(commands.Cog):
             await ctx.send(embed=embed)
 
     @commands.command(name='play', aliases=['p'],help='Play song from url', usage='[url or name]')
-    async def play(self, ctx, url: str):
+    async def play(self, ctx, *, url: str):
         voice = ctx.voice_client
         status = ctx.author.voice
         if status == None:
@@ -119,7 +117,7 @@ class music(commands.Cog):
             return
     
     @commands.command(name='search', help='Search for a song on youtube', usage='[name]')
-    async def search(self, ctx, name: str):
+    async def search(self, ctx, *, name: str):
         res = search('all', name)
         urls = ''
         for i in range(5):
@@ -367,6 +365,7 @@ class music(commands.Cog):
             except asyncio.TimeoutError:
                 await ctx.message.channel.send('You took too long, cancelling')
                 return
+            await commands.Cog.process_commands(ctx)
             if msg.content.lower() == 'n':
                 await ctx.message.channel.send('Cancelling')
                 return
