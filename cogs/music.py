@@ -88,17 +88,6 @@ class music(commands.Cog):
         status = ctx.author.voice
         if status == None:
             return await ctx.message.channel.send('Please join a voice channel')
-        if url == '':
-            if self.queue != []:
-                if voice != None:
-                    await self.playing(ctx, voice)
-                else:
-                    await status.channel.connect()
-                    voice = ctx.voice_client
-                    await self.playing(ctx, voice)
-            else:
-                await ctx.message.channel.send('Usage: !!play [url] or [name]')
-            return
         channel = status.channel
         if voice != None:
             if voice != channel:
@@ -116,7 +105,19 @@ class music(commands.Cog):
     @play.error
     async def play_error(e, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send("Please enter a url or name")
+            voice = ctx.voice_client
+            status = ctx.author.voice
+            self = self
+            if self.queue != []:
+                if voice != None:
+                    await self.playing(ctx, voice)
+                else:
+                    await status.channel.connect()
+                    voice = ctx.voice_client
+                    await self.playing(ctx, voice)
+            else:
+                await ctx.message.channel.send('Usage: !!play [url] or [name]')
+            return
     
     @commands.command(name='search', help='Search for a song on youtube', usage='[name]')
     async def search(self, ctx, name: str):
