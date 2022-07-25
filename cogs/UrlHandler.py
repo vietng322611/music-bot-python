@@ -13,7 +13,10 @@ def get_video_info(url) -> str:
     title = s.find('title').get_text().replace(' - YouTube', '')
     return title
 
-def search(opt, input) -> str:
+def search(opt, input) -> list:
+    '''
+        Returns a list of videos from the query
+    '''
     r = requests.get("https://www.youtube.com/results?search_query=" + input)
     s = bs(r.text, "html.parser")
     if opt == 'one':

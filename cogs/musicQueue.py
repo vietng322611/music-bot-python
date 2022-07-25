@@ -33,8 +33,8 @@ class get_song():
 
 class queue_info():
     def __init__(self, *args):
-        self.queue = args[0]
-        self.url = args[1]
+        self.url = args[0]
+        self.player = args[1]
         self.title = args[2]
         self.user = args[3]
         self.avatar = args[4]
