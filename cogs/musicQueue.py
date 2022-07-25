@@ -6,7 +6,7 @@ class get_song():
         self.title = title
         self.thumbnail_url = thumbnail_url
 
-    def getPlayer(self):
+    def getPlayer(self) -> set:
         '''
             Return video player and video duration.
         '''

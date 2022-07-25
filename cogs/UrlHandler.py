@@ -4,13 +4,16 @@ from bs4 import BeautifulSoup as bs
 import requests
 import re
 
-def get_video_info(url):
+def get_video_info(url) -> str:
+    '''
+        Return video title
+    '''
     r = requests.get(url)
     s = bs(r.text, "html.parser")
     title = s.find('title').get_text().replace(' - YouTube', '')
     return title
 
-def search(opt, input):
+def search(opt, input) -> str:
     r = requests.get("https://www.youtube.com/results?search_query=" + input)
     s = bs(r.text, "html.parser")
     if opt == 'one':
@@ -20,7 +23,7 @@ def search(opt, input):
         res = re.findall(r"watch\?v=(\S{11})", s.decode())
         return res
 
-def ytdl(url):
+def ytdl(url) -> set:
     if not url.startswith(('https://www.youtube.com/watch?v=', 'https://youtu.be/', 'www.youtube.com/watch?v=', 'youtu.be/')):
         url = 'https://www.youtube.com/' + search('one', url)[0]
     ydl_opts = {
