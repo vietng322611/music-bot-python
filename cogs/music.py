@@ -23,26 +23,41 @@ class music(commands.Cog):
         '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 
         'options': '-vn'}
         self.queue = Queue()
+        self.current_song = []
         self.task = []
         self.config = config
         if not os.path.exists('./cogs/queues'):
             os.mkdir('./cogs/queues')
 
     ''' Variables explain:
-            + self.config: Contain config object from config file
-            + self.queue: Contain Queue object
-            + self.task: Contain async tasks
-            + self.voice: Contain bot voice object
-            + self.status: Contain user voice object
+            + self.config: Contain config object from config file.
+            + self.queue: Contain Queue object.
+            + self.current_song: For show queue command
+            + self.task: Contain async tasks.
+            + self.voice: Contain bot voice object.
+            + self.status: Contain user voice object.
     '''
 
     async def add_to_queue(self, ctx, *args):
-        obj = self.queue.add(args)
+        '''
+            Add song to the queue and send embed message to notify users the song has been added.
+
+            **Parameters**
+            
+            video url: `str`
+            video player url: `str`
+            video title: `str`
+            request user's name: `ctx.author.name` -> `str`
+            video thumbnail url: `str`
+            request user's avatar url: `ctx.author.avatar_url` -> `str`
+            video duration: `str`
+        '''
+        queue_object = self.queue.add(args)
         embed = Embed(title="**Added To Queue**", color=Color.from_rgb(255, 0, 0))
-        embed.add_field(name="**Song Name**", value=f"[{obj.title}]({obj.url})", inline=False)
-        embed.add_field(name="**Song Length**", value=f"{obj.duration}", inline=False)
-        embed.set_thumbnail(url=obj.thumbnail)
-        embed.set_footer(text=f"Requested by {obj.user}", icon_url=obj.avatar)
+        embed.add_field(name="**Song Name**", value=f"[{queue_object.title}]({queue_object.url})", inline=False)
+        embed.add_field(name="**Song Length**", value=f"{queue_object.duration}", inline=False)
+        embed.set_thumbnail(url=queue_object.thumbnail)
+        embed.set_footer(text=f"Requested by {queue_object.user}", icon_url=queue_object.avatar)
         await ctx.message.channel.send(embed=embed)
 
     async def get_message(self, ctx, user):
@@ -64,14 +79,14 @@ class music(commands.Cog):
 
     async def playing(self, ctx, voice):
         if not voice.is_playing() and not voice.is_paused() and not self.queue.is_empty():
-            obj = self.queue.pop()
-            self.current_song = [obj.title, obj.duration]
+            queue_object = self.queue.pop()
+            self.current_song = [queue_object.title, queue_object.duration]
             loop = asyncio.get_event_loop()
             embed = Embed(title="**Now Playing**", color=Color.from_rgb(255, 0, 0))
-            embed.add_field(name="**Song Name**", value=f"[{obj.title}]({obj.url})", inline=False)
-            embed.add_field(name="**Song Length**", value=f"{obj.duration}", inline=False)
-            embed.set_thumbnail(url=obj.thumbnail)
-            embed.set_footer(text=f"Requested by {obj.user}", icon_url=obj.avatar)
+            embed.add_field(name="**Song Name**", value=f"[{queue_object.title}]({queue_object.url})", inline=False)
+            embed.add_field(name="**Song Length**", value=f"{queue_object.duration}", inline=False)
+            embed.set_thumbnail(url=queue_object.thumbnail)
+            embed.set_footer(text=f"Requested by {queue_object.user}", icon_url=queue_object.avatar)
             voice.play(FFmpegPCMAudio(self.queue.pop(0), **self.FFMPEG_OPTS), after=lambda x=None: self.task.append(loop.create_task(self.playing(ctx, voice))))
             voice.source = PCMVolumeTransformer(voice.source, volume=1.0)
             await ctx.send(embed=embed)
@@ -80,6 +95,7 @@ class music(commands.Cog):
     async def play(self, ctx, *, url: str):
         voice = ctx.voice_client
         status = ctx.author.voice
+        # Check user & bot voice state
         if status == None:
             return await ctx.message.channel.send('Please join a voice channel')
         channel = status.channel
@@ -88,10 +104,10 @@ class music(commands.Cog):
                 await voice.move_to(channel)
         else:
             await channel.connect()
-        url, url2, title, thumbnail_url, duration = ytdl(url)
-        voice = ctx.voice_client
+        url, url2, title, thumbnail_url, duration = ytdl(url) # url2 youtube video player source
+        voice = ctx.voice_client # Get bot vc after connect (voice = await channel.connect() somehow doesn't work)
         if not voice.is_playing():
-            self.create_queue(url, url2, title, ctx.author.name, thumbnail_url, ctx.author.avatar_url, duration)
+            self.queue.add(url, url2, title, ctx.author.name, thumbnail_url, ctx.author.avatar_url, duration)
             await self.playing(ctx, voice)
         else:
             await self.add_to_queue(ctx, url, url2, title, ctx.author.name, thumbnail_url, ctx.author.avatar_url, duration)
