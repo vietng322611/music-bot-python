@@ -61,9 +61,12 @@ class Queue():
 
     def pop(self, *pos: int) -> queue_info:
         '''
-            Delete queue at position x, default first.
-            Return deleted queue object.
-            Argument: position(int).
+            Delete queue at position x and return deleted queue object.
+
+            Parameters
+
+            position: `int`
+                Queue position from 0 onwards. Default is first.
         '''
         if len(pos) == 0: pos = 0
         elif len(pos) > 1: raise TypeError('pop expected at most 1 argument, got 2')
@@ -78,6 +81,6 @@ class Queue():
     
     def size(self) -> int:
         '''
-            Return queue length
+            Return queue length.
         '''
         return len(self.queue)
