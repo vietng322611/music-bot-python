@@ -65,7 +65,6 @@ async def add_role(message): # Add mute role to user if they are spamming banned
 
 @bot.event
 async def on_message(message):
-    inp = message.content
     if message.author == bot.user:
         return
     await bot.process_commands(message)
