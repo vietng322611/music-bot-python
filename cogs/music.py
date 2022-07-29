@@ -398,7 +398,7 @@ class music(commands.Cog):
     @commands.command(name="qdelete", aliases=['qdel'], help='Delete your queue')
     async def delqueue(self, ctx):
         try:
-            queue = pickle.load(open('./cogs/queues/' + str(ctx.author.id), 'rb'))
+            pickle.load(open('./cogs/queues/' + str(ctx.author.id), 'rb'))
         except FileNotFoundError:
             await ctx.message.channel.send('You have no queue, please create a queue first')
             return
