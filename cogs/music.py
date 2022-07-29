@@ -29,13 +29,11 @@ class music(commands.Cog):
         if not os.path.exists('./cogs/queues'):
             os.mkdir('./cogs/queues')
 
-    ''' Variables explain:
-            + self.config: Contain config object from config file.
-            + self.queue: Contain Queue object.
+    ''' Variables explain (__init__ function):
+            + self.config: Config object from config file.
+            + self.queue: Queue object.
             + self.current_song: For show queue command
             + self.task: Contain async tasks.
-            + self.voice: Contain bot voice object.
-            + self.status: Contain user voice object.
     '''
 
     async def add_to_queue(self, ctx, *args):
@@ -77,6 +75,11 @@ class music(commands.Cog):
         await commands.Cog.process_commands(ctx)
         return None
 
+    ''' Variables explain (All music related functions):
+            + voice: Bot voice object.
+            + status: User voice object.
+    '''
+
     async def playing(self, ctx, voice):
         if not voice.is_playing() and not voice.is_paused() and not self.queue.is_empty():
             queue_object = self.queue.pop()
@@ -87,7 +90,7 @@ class music(commands.Cog):
             embed.add_field(name="**Song Length**", value=f"{queue_object.duration}", inline=False)
             embed.set_thumbnail(url=queue_object.thumbnail)
             embed.set_footer(text=f"Requested by {queue_object.user}", icon_url=queue_object.avatar)
-            voice.play(FFmpegPCMAudio(self.queue.pop(0), **self.FFMPEG_OPTS), after=lambda x=None: self.task.append(loop.create_task(self.playing(ctx, voice))))
+            voice.play(FFmpegPCMAudio(queue_object.player, **self.FFMPEG_OPTS), after=lambda x=None: self.task.append(loop.create_task(self.playing(ctx, voice))))
             voice.source = PCMVolumeTransformer(voice.source, volume=1.0)
             await ctx.send(embed=embed)
 
@@ -112,7 +115,6 @@ class music(commands.Cog):
         else:
             await self.add_to_queue(ctx, url, url2, title, ctx.author.name, thumbnail_url, ctx.author.avatar_url, duration)
 
-    ''' 
     @play.error
     async def play_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
@@ -128,7 +130,6 @@ class music(commands.Cog):
             else:
                 await ctx.message.channel.send('Usage: !!play [url] or [name]')
             return
-    '''
 
     @commands.command(name='search', help='Search for a song on youtube', usage='[name]')
     async def search(self, ctx, *, name: str):
@@ -162,12 +163,11 @@ class music(commands.Cog):
         if not voice.is_playing():
             await self.playing(ctx, voice)
 
-    '''
+
     @search.error
     async def search_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send("Please enter a name")
-    '''
 
     @commands.command(name='skip', help='Skip to next song in queue')
     async def skip(self, ctx):
@@ -207,14 +207,12 @@ class music(commands.Cog):
         voice.source.volume = volume
         return await ctx.message.channel.send(f'**Volume changed to** {int(volume)}/200')
 
-    '''
     @volume.error
     async def volume_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send("Please enter a number")
         if isinstance(error, commands.BadArgument):
             await ctx.send("Please enter a number")
-    '''
 
     @commands.command(name='delete', aliases=['d', 'del'],help='Delete a song from queue', usage='[song index]')
     async def delete(self, ctx, idx: int):
@@ -310,13 +308,11 @@ class music(commands.Cog):
             voice.play(FFmpegPCMAudio('gg.mp3'))
             voice.source = PCMVolumeTransformer(voice.source, volume=1.5)
 
-    '''
     @gg.error
     async def gg_error(self, ctx, error):
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.message.channel.send('Please enter something')
             return
-    '''
 
     @commands.command(name='join', help='Make bot join a vocie channel')
     async def join(self, ctx):
@@ -399,7 +395,7 @@ class music(commands.Cog):
         embed.add_field(name="Queued songs", value=list_queue, inline=False)
         return await ctx.message.channel.send(embed=embed)
 
-    @commands.command(name="qdelete", aliases=['del'], help='Delete your queue')
+    @commands.command(name="qdelete", aliases=['qdel'], help='Delete your queue')
     async def delqueue(self, ctx):
         try:
             queue = pickle.load(open('./cogs/queues/' + str(ctx.author.id), 'rb'))
