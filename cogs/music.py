@@ -95,7 +95,7 @@ class music(commands.Cog):
             await ctx.send(embed=embed)
 
     @commands.command(name='play', aliases=['p'],help='Play song from url', usage='[url or name]')
-    async def play(self, ctx, *, url: str):
+    async def play(self, ctx, url: str):
         voice = ctx.voice_client
         status = ctx.author.voice
         # Check user & bot voice state
@@ -110,10 +110,10 @@ class music(commands.Cog):
         url, url2, title, thumbnail_url, duration = ytdl(url) # url2 youtube video player source
         voice = ctx.voice_client # Get bot vc after connect (voice = await channel.connect() somehow doesn't work)
         if not voice.is_playing():
-            self.queue.add(url, url2, title, ctx.author.name, thumbnail_url, ctx.author.avatar_url, duration)
+            self.queue.add(url, url2, title, ctx.author.name, ctx.author.avatar_url, thumbnail_url, duration)
             await self.playing(ctx, voice)
         else:
-            await self.add_to_queue(ctx, url, url2, title, ctx.author.name, thumbnail_url, ctx.author.avatar_url, duration)
+            await self.add_to_queue(ctx, url, url2, title, ctx.author.name, ctx.author.avatar_url, thumbnail_url, duration)
 
     @play.error
     async def play_error(self, ctx, error):
@@ -132,7 +132,7 @@ class music(commands.Cog):
             return
 
     @commands.command(name='search', help='Search for a song on youtube', usage='[name]')
-    async def search(self, ctx, *, name: str):
+    async def search(self, ctx, name: str):
         res = search('all', name)
         urls = ''
         for i in range(5):
@@ -148,7 +148,7 @@ class music(commands.Cog):
             return 'Cancled'
         url = 'https://www.youtube.com/watch?v=' + res[parameter]
         url, url2, title, thumbnail_url, duration = ytdl(url)
-        await self.add_to_queue(ctx, url, url2, title, ctx.author.name, thumbnail_url, ctx.author.avatar_url, duration)
+        await self.add_to_queue(ctx, url, url2, title, ctx.author.name, ctx.author.avatar_url, thumbnail_url, duration)
         voice = ctx.guild.voice_client 
         status = ctx.author.voice
         if voice == None:   
