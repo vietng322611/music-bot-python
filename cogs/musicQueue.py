@@ -45,11 +45,11 @@ class Queue():
     def __init__(self):
         self.queue = []
 
-    def add(self, *args) -> queue_info:
+    def add(self, url: str, player: str, title: str, user: str, avatar: str, thumbnail: str, duration: str) -> queue_info:
         '''
             Add song to queue and return added queue object.
         '''
-        self.queue.append(queue_info(args))
+        self.queue.append(queue_info(url, player, title,  user, avatar, thumbnail, duration))
         return self.queue[-1]
 
     def clear(self) -> None:
