@@ -1,11 +1,16 @@
 from youtube_dl import YoutubeDL as youtubedl
 
+class get_song():
+    def __init__(self, url, title, thumbnail_url):
+        self.url = url.strip()
+        self.title = title
+        self.thumbnail_url = thumbnail_url
 
-def getPlayer(self) -> set:
-    '''
-        Return video player and video duration.
-    '''
-    ydl_opts = {
+    def getPlayer(self) -> set:
+        '''
+            Return video player and video duration.
+        '''
+        ydl_opts = {
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'aac',
@@ -15,16 +20,16 @@ def getPlayer(self) -> set:
         'agelimit': '20',
         'noplaylist': 'True',
         'default_search': 'auto'
-    }
-    with youtubedl(ydl_opts) as ydl:
-        info = ydl.extract_info(self.url, download=False)
-        url2 = info['url']
-        duration = info['duration']
-    m1, s1 = divmod(int(duration), 60)
-    if len(str(s1)) == 1:
-        s1 = '0' + str(s1)
-    duration = '%s:%s' % (m1, s1)
-    return url2, duration
+        }
+        with youtubedl(ydl_opts) as ydl:
+            info = ydl.extract_info(self.url, download=False)
+            url2 = info['url']
+            duration = info['duration']
+        m1, s1 = divmod(int(duration), 60)
+        if len(str(s1)) == 1:
+            s1 = '0' + str(s1)
+        duration = '%s:%s' % (m1, s1)
+        return url2, duration
 
 class queue_info():
     def __init__(self, *args):
