@@ -1,16 +1,11 @@
 from youtube_dl import YoutubeDL as youtubedl
 
-class get_song():
-    def __init__(self, url, title, thumbnail_url):
-        self.url = url.strip()
-        self.title = title
-        self.thumbnail_url = thumbnail_url
 
-    def getPlayer(self) -> set:
-        '''
-            Return video player and video duration.
-        '''
-        ydl_opts = {
+def getPlayer(self) -> set:
+    '''
+        Return video player and video duration.
+    '''
+    ydl_opts = {
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'aac',
@@ -20,16 +15,16 @@ class get_song():
         'agelimit': '20',
         'noplaylist': 'True',
         'default_search': 'auto'
-        }
-        with youtubedl(ydl_opts) as ydl:
-            info = ydl.extract_info(self.url, download=False)
-            url2 = info['url']
-            duration = info['duration']
-        m1, s1 = divmod(int(duration), 60)
-        if len(str(s1)) == 1:
-            s1 = '0' + str(s1)
-        duration = '%s:%s' % (m1, s1)
-        return url2, duration
+    }
+    with youtubedl(ydl_opts) as ydl:
+        info = ydl.extract_info(self.url, download=False)
+        url2 = info['url']
+        duration = info['duration']
+    m1, s1 = divmod(int(duration), 60)
+    if len(str(s1)) == 1:
+        s1 = '0' + str(s1)
+    duration = '%s:%s' % (m1, s1)
+    return url2, duration
 
 class queue_info():
     def __init__(self, *args):
@@ -59,7 +54,7 @@ class Queue():
         self.queue.clear()
         return
 
-    def pop(self, *pos: int) -> queue_info:
+    def pop(self, pos: int = 0) -> queue_info:
         '''
             Delete queue at position x and return deleted queue object.
 
@@ -68,9 +63,7 @@ class Queue():
             position: `int`
                 Queue position from 0 onwards. Default is first.
         '''
-        if len(pos) == 0: pos = 0
-        elif len(pos) > 1: raise TypeError('pop expected at most 1 argument, got 2')
-        else: pos = pos[0]
+        if len(pos) > 1: raise TypeError('pop expected at most 1 argument, got 2')
         return self.queue.pop(pos)
 
     def is_empty(self) -> bool:
