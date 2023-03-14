@@ -345,7 +345,7 @@ class music(commands.Cog):
         voice = ctx.voice_client
         for url in queue:
             url2, duration = url.getPlayer()
-            self.create_queue(url.url, url2, url.title, ctx.author.name, url.thumbnail_url, ctx.author.avatar_url, duration)
+            await self.add_to_queue(url.url, url2, url.title, ctx.author.name, url.thumbnail_url, ctx.author.avatar_url, duration)
         if not voice.is_playing():
             await self.playing(ctx, voice)
 
