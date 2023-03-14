@@ -3,6 +3,7 @@
 
 import modwall; modwall.check() # Library checker
 
+import asyncio
 import sys
 import os
 import json
@@ -32,10 +33,9 @@ TOKEN = os.getenv("BOT_TOKEN")
 intents = discord.Intents.default()
 intents.presences = True
 intents.members = True
+intents.message_content = True
 intents.messages = True
 bot = commands.Bot(description="I'm a happy bot", command_prefix=config["Prefix"], intents=intents)
-bot.add_cog(music(bot, config))
-bot.add_cog(extent(bot, config))
 queue = []
 queue_info = []
 creator = config["Creator_Id"]
@@ -86,4 +86,10 @@ async def on_member_remove(member): #testing
     print(member)
     await get(server.text_channels, name='welcome').send(f"{member.name} has leaved")
 
-bot.run(TOKEN)
+async def main():
+    async with bot:
+        await bot.add_cog(music(bot, config))
+        await bot.add_cog(extent(bot, config))
+        await bot.start(TOKEN)
+
+asyncio.run(main())
