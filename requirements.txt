@@ -1,5 +1,5 @@
 beautifulsoup4
-discord.py>=1.7.3
+discord.py>=2.2.2
 requests
 youtube_dl>=2021.12.17
 python-dotenv
