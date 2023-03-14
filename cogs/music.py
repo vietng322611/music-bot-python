@@ -94,7 +94,7 @@ class music(commands.Cog):
             voice.source = PCMVolumeTransformer(voice.source, volume=1.0)
             await ctx.send(embed=embed)
 
-    @commands.command(name='play', aliases=['p'],help='Play song from url', usage='[url or name]')
+    @commands.command(name='play', aliases=['p'], help='Play song from url', usage='[url or name]')
     async def play(self, ctx, url: str):
         voice = ctx.voice_client
         status = ctx.author.voice
