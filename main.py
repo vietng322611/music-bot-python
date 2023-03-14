@@ -1,12 +1,5 @@
 # This made by vietng322611, please be respect, don't copy it without permission, you can change the code inside into your own.
-# If something goes wrong, DM me (murasaki#1843) your log or try restarting the bot.
-
-''' TODO:
-    + Make a spammer detector
-    + Clean app after exit
-    + Rebuild logger.py
- '''
-# ! Fix certains bugs cause app to crash
+# If something goes wrong, DM me your log or try restarting the bot.
 
 import modwall; modwall.check() # Library checker
 
@@ -25,7 +18,6 @@ from cogs.extent import extent
 from gtts import gTTS
 from time import sleep
 
-# Check config file directory
 config = json.load(open('./config.json'))
 if not os.path.exists('logs'):
     os.mkdir('logs')
@@ -37,11 +29,15 @@ if config["Check_Update_On_Start"] == "True":
 load_dotenv('token.env')
 TOKEN = os.getenv("BOT_TOKEN")
 
-bot = commands.Bot(description="", command_prefix=config["Prefix"])
+intents = discord.Intents.default()
+intents.presences = True
+intents.members = True
+intents.messages = True
+bot = commands.Bot(description="I'm a happy bot", command_prefix=config["Prefix"], intents=intents)
 bot.add_cog(music(bot, config))
 bot.add_cog(extent(bot, config))
-queue = [] # Music queue
-queue_info = [] # Music info
+queue = []
+queue_info = []
 creator = config["Creator_Id"]
 
 async def voice_check(voice, channel): # Check if only bot in voice channel
@@ -58,18 +54,6 @@ async def on_ready():
     print(f'Connected')
 
 @bot.event
-async def add_role(message): # Add mute role to user if they are spamming banned words
-    member = message.author
-    role = get(message.guild.roles, name = "Mute")
-    return await member.add_roles(role)
-
-@bot.event
-async def on_message(message):
-    if message.author == bot.user:
-        return
-    await bot.process_commands(message)
-
-@bot.event
 async def on_voice_state_update(member, before, after): # Get voice status
     if member.name == bot.user.name:
         return
@@ -83,11 +67,23 @@ async def on_voice_state_update(member, before, after): # Get voice status
         else:
           if before.channel == None and after.channel.id == channel.id: # If someone joins the voice channel of the bot, bot will say something, j4f
             if not voice.is_playing():
-              tts = gTTS(text=config["Voice_Greetting"].format(member.name), lang=config["gg_Command_lang"])
+              tts = gTTS(text=config["Voice_Greetting"], lang=config["gg_Command_lang"])
               tts.save('gg.mp3')
               sleep(1.5)
               voice.play(discord.FFmpegPCMAudio('gg.mp3'))
               voice.source = discord.PCMVolumeTransformer(voice.source, volume=2.0)
               return
+            
+@bot.event
+async def on_member_join(member): #testing
+    server = bot.get_server(member.server)
+    print(member)
+    await get(server.text_channels, name='welcome').send(f"{member.name} has joined")
+
+@bot.event
+async def on_member_remove(member): #testing
+    server = bot.get_server(member.server)
+    print(member)
+    await get(server.text_channels, name='welcome').send(f"{member.name} has leaved")
 
 bot.run(TOKEN)
