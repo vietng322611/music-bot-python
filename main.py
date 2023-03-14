@@ -37,7 +37,7 @@ if config["Check_Update_On_Start"] == "True":
 load_dotenv('token.env')
 TOKEN = os.getenv("BOT_TOKEN")
 
-bot = commands.Bot(description="", command_prefix=config["Prefix"]) 
+bot = commands.Bot(description="", command_prefix=config["Prefix"])
 bot.add_cog(music(bot, config))
 bot.add_cog(extent(bot, config))
 queue = [] # Music queue
@@ -81,7 +81,7 @@ async def on_voice_state_update(member, before, after): # Get voice status
                 await voice_check(voice, channel)
                 return
         else:
-          if before.channel == None and after.channel.id == channel.id: # If someone joins the voice channel of the bot, bot will say somgthing, j4f
+          if before.channel == None and after.channel.id == channel.id: # If someone joins the voice channel of the bot, bot will say something, j4f
             if not voice.is_playing():
               tts = gTTS(text=config["Voice_Greetting"].format(member.name), lang=config["gg_Command_lang"])
               tts.save('gg.mp3')
