@@ -1,7 +1,7 @@
 beautifulsoup4
 discord.py>=1.7.3
 requests
-youtube_dl
+youtube_dl>=2021.12.17
 python-dotenv
 pynacl
 gtts
