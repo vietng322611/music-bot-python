@@ -26,8 +26,9 @@ ffmpeg: ```https://www.ffmpeg.org/download.html```
   - **Windows**: `pip install -r requirements.txt`
   - ***nix**: `python3 -m pip install -r requirements.txt`
 - Run bot:
-  - **Windows**: `python bot.py`
-  - ***nix**: `python3 bot.py`
+  - Navigate to the directory first using: `cd [directory]`
+  - **Windows**: `python main.py`
+  - ***nix**: `python3 main.py`
 - How to use config file:
   - "Check_Update_On_Start": Set this to False if you don't want to update
   - "Prefix": Bot prefix, default is !!
@@ -38,12 +39,13 @@ ffmpeg: ```https://www.ffmpeg.org/download.html```
 ##
 ## Libraries in use
 - beautifulsoup4
-- discord.py
+- discord.py>=1.7.3
 - requests
-- youtube_dl
+- youtube_dl>=2021.12.17
 - python-dotenv
 - pynacl
 - gtts
+- aiohttp(>=3.6.2, <3.8.0)
 ## Note
 If you have problems with your bot try updating to the latest release or DM me your issues via discord  
 ## Credit
