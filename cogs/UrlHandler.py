@@ -1,4 +1,4 @@
-from youtube_dl import YoutubeDL as youtubedl
+from yt_dlp import YoutubeDL as youtubedl
 from bs4 import BeautifulSoup as bs
 
 import requests
@@ -27,8 +27,12 @@ def search(opt, input) -> list:
         return res
 
 def ytdl(url) -> set:
-    if not url.startswith(('https://www.youtube.com/watch?v=', 'https://youtu.be/', 'www.youtube.com/watch?v=', 'youtu.be/')):
-        url = 'https://www.youtube.com/' + search('one', url)[0]
+    if not url.startswith((
+        'https://www.youtube.com/watch?v=',
+        'https://youtu.be/',
+        'www.youtube.com/watch?v=',
+        'youtu.be/'
+    )): url = 'https://www.youtube.com/' + search('one', url)[0]
     ydl_opts = {
         'postprocessors': [{
             'key': 'FFmpegExtractAudio',

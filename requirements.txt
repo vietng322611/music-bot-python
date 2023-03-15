@@ -1,7 +1,7 @@
 beautifulsoup4
 discord.py>=2.2.2
 requests
-youtube_dl>=2021.12.17
+yt_dlp>=2023.03.04
 python-dotenv
 pynacl
 gtts

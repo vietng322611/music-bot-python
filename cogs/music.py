@@ -8,7 +8,7 @@ from discord.colour import Color
 from discord.ext import commands
 from cogs.UrlHandler import *
 from gtts import gTTS
-from cogs.musicQueue import *
+from cogs.musicQueue import get_song, Queue
 
 import asyncio
 import pickle
@@ -47,10 +47,10 @@ class music(commands.Cog):
             video title: `str`
             request user's name: `ctx.author.name` -> `str`
             video thumbnail url: `str`
-            request user's avatar url: `ctx.author.avatar_url` -> `str`
+            request user's avatar url: `ctx.author.avatar` -> `str`
             video duration: `str`
         '''
-        queue_object = self.queue.add(args)
+        queue_object = await self.queue.add(args)
         embed = Embed(title="**Added To Queue**", color=Color.from_rgb(255, 0, 0))
         embed.add_field(name="**Song Name**", value=f"[{queue_object.title}]({queue_object.url})", inline=False)
         embed.add_field(name="**Song Length**", value=f"{queue_object.duration}", inline=False)
@@ -81,8 +81,9 @@ class music(commands.Cog):
     '''
 
     async def playing(self, ctx, voice):
-        if not voice.is_playing() and not voice.is_paused() and not self.queue.is_empty():
-            queue_object = self.queue.pop()
+        is_empty = await self.queue.is_empty()
+        if not voice.is_playing() and not voice.is_paused() and not is_empty:
+            queue_object = await self.queue.pop()
             self.current_song = [queue_object.title, queue_object.duration]
             loop = asyncio.get_event_loop()
             embed = Embed(title="**Now Playing**", color=Color.from_rgb(255, 0, 0))
@@ -90,9 +91,9 @@ class music(commands.Cog):
             embed.add_field(name="**Song Length**", value=f"{queue_object.duration}", inline=False)
             embed.set_thumbnail(url=queue_object.thumbnail)
             embed.set_footer(text=f"Requested by {queue_object.user}", icon_url=queue_object.avatar)
+            await ctx.message.channel.send(embed=embed)
             voice.play(FFmpegPCMAudio(queue_object.player, **self.FFMPEG_OPTS), after=lambda x=None: self.task.append(loop.create_task(self.playing(ctx, voice))))
-            voice.source = PCMVolumeTransformer(voice.source, volume=1.0)
-            await ctx.send(embed=embed)
+            voice.source = PCMVolumeTransformer(voice.source, volume=1.0)    
 
     @commands.command(name='play', aliases=['p'], help='Play song from url', usage='[url or name]')
     async def play(self, ctx, url: str):
@@ -107,13 +108,13 @@ class music(commands.Cog):
                 await voice.move_to(channel)
         else:
             await channel.connect()
-        url, url2, title, thumbnail_url, duration = ytdl(url) # url2 youtube video player source
+        url, url2, title, thumbnail_url, duration = ytdl(url) # url2: youtube video player source
         voice = ctx.voice_client # Get bot vc after connect (voice = await channel.connect() somehow doesn't work)
         if not voice.is_playing():
-            self.queue.add(url, url2, title, ctx.author.name, ctx.author.avatar_url, thumbnail_url, duration)
+            await self.queue.add(url, url2, title, ctx.author.name, ctx.author.avatar, thumbnail_url, duration)
             await self.playing(ctx, voice)
         else:
-            await self.add_to_queue(ctx, url, url2, title, ctx.author.name, ctx.author.avatar_url, thumbnail_url, duration)
+            await self.add_to_queue(ctx, url, url2, title, ctx.author.name, ctx.author.avatar, thumbnail_url, duration)
 
     @play.error
     async def play_error(self, ctx, error):
@@ -148,7 +149,7 @@ class music(commands.Cog):
             return 'Cancled'
         url = 'https://www.youtube.com/watch?v=' + res[parameter]
         url, url2, title, thumbnail_url, duration = ytdl(url)
-        await self.add_to_queue(ctx, url, url2, title, ctx.author.name, ctx.author.avatar_url, thumbnail_url, duration)
+        await self.add_to_queue(ctx, url, url2, title, ctx.author.name, ctx.author.avatar, thumbnail_url, duration)
         voice = ctx.guild.voice_client 
         status = ctx.author.voice
         if voice == None:   
@@ -181,7 +182,7 @@ class music(commands.Cog):
             return
         elif status.channel.id != voice.channel.id:
             await ctx.message.channel.send('Please switch to my current voice channel to use that')
-        elif not self.queue.is_empty():
+        elif not await self.queue.is_empty():
             voice.stop()
             await self.playing(ctx, voice)
             return
@@ -216,8 +217,9 @@ class music(commands.Cog):
 
     @commands.command(name='delete', aliases=['d', 'del'],help='Delete a song from queue', usage='[song index]')
     async def delete(self, ctx, idx: int):
-        if 0 <= idx < self.queue.size():
-            self.queue.pop(idx)
+        size = await self.queue.size()
+        if 0 <= idx < size:
+            await self.queue.pop(idx)
             await ctx.message.channel.send('Deleted from queue')
         else:
             await ctx.message.channel.send('Out of range')
@@ -244,7 +246,8 @@ class music(commands.Cog):
             return
         count = 0
         list_queue = ''
-        for i in range(0, self.queue.size()):
+        size = self.queue.size()
+        for i in range(0, size):
             list_queue += f'{count}: {self.queue[i].title} [{self.queue[i].url}]\n'
             count += 1
         embed.add_field(name="Queued songs", value=list_queue, inline=False)
@@ -283,7 +286,7 @@ class music(commands.Cog):
         elif status.channel.id != voice.channel.id:
             await ctx.message.channel.send('Please switch to my current voice channel to use that')
         else:
-            self.queue.clear()
+            await self.queue.clear()
             voice.stop()
             voice.cleanup()
             await voice.disconnect()
@@ -345,7 +348,7 @@ class music(commands.Cog):
         voice = ctx.voice_client
         for url in queue:
             url2, duration = url.getPlayer()
-            await self.add_to_queue(url.url, url2, url.title, ctx.author.name, url.thumbnail_url, ctx.author.avatar_url, duration)
+            await self.add_to_queue(url.url, url2, url.title, ctx.author.name, url.thumbnail_url, ctx.author.avatar, duration)
         if not voice.is_playing():
             await self.playing(ctx, voice)
 

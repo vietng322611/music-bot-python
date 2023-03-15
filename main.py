@@ -31,10 +31,10 @@ load_dotenv('token.env')
 TOKEN = os.getenv("BOT_TOKEN")
 
 intents = discord.Intents.default()
+intents.all()
 intents.presences = True
 intents.members = True
 intents.message_content = True
-intents.messages = True
 bot = commands.Bot(description="I'm a happy bot", command_prefix=config["Prefix"], intents=intents)
 queue = []
 queue_info = []
@@ -44,7 +44,7 @@ async def voice_check(voice, channel): # Check if only bot in voice channel
     member_count = len(channel.members)
     if member_count == 1:
         if voice.is_playing():
-            voice.source.cleanup()       
+            voice.source.cleanup()     
             voice.stop()
         await voice.disconnect()
     return

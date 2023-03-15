@@ -1,4 +1,4 @@
-from youtube_dl import YoutubeDL as youtubedl
+from yt_dlp import YoutubeDL as youtubedl
 
 class get_song():
     def __init__(self, url, title, thumbnail_url):
@@ -45,21 +45,21 @@ class Queue():
     def __init__(self):
         self.queue = []
 
-    def add(self, url: str, player: str, title: str, user: str, avatar: str, thumbnail: str, duration: str) -> queue_info:
+    async def add(self, url: str, player: str, title: str, user: str, avatar: str, thumbnail: str, duration: str) -> queue_info:
         '''
             Add song to queue and return added queue object.
         '''
-        self.queue.append(queue_info(url, player, title,  user, avatar, thumbnail, duration))
+        self.queue.append(queue_info(url, player, title, user, avatar, thumbnail, duration))
         return self.queue[-1]
 
-    def clear(self) -> None:
+    async def clear(self) -> None:
         '''
             Clear the queue.
         '''
         self.queue.clear()
         return
 
-    def pop(self, pos: int = 0) -> queue_info:
+    async def pop(self, pos: int = 0) -> queue_info:
         '''
             Delete queue at position x and return deleted queue object.
 
@@ -68,16 +68,15 @@ class Queue():
             position: `int`
                 Queue position from 0 onwards. Default is first.
         '''
-        if len(pos) > 1: raise TypeError('pop expected at most 1 argument, got 2')
         return self.queue.pop(pos)
 
-    def is_empty(self) -> bool:
+    async def is_empty(self) -> bool:
         '''
             Return true if queue is empty.
         '''
         return len(self.queue) == 0
     
-    def size(self) -> int:
+    async def size(self) -> int:
         '''
             Return queue length.
         '''

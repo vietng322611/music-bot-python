@@ -41,7 +41,7 @@ ffmpeg: ```https://www.ffmpeg.org/download.html```
 - beautifulsoup4
 - discord.py>=1.7.3
 - requests
-- youtube_dl>=2021.12.17
+- yt_dlp>=2023.03.04
 - python-dotenv
 - pynacl
 - gtts
