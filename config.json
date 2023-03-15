@@ -1,9 +1,9 @@
 {
-  "Check_Update_On_Start": "True",
+  "Check_Update_On_Start": "False",
   "Log_Path": "./logs/",
   "Prefix": "!!",
   "Update_Url": "https://api.github.com/repos/vietng322611/music-bot-python/releases/latest",
-  "Update": "2.4.7",
+  "Update": "2023.03.15",
   "Creator_Id": 0,
   "Voice_Greetting": "",
   "gg_Command_lang": "en"
