@@ -7,3 +7,4 @@ pynacl
 gtts
 aiohttp(>=3.6.2, <3.8.0)
 zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability
+urllib3>=2.6.3 # not directly required, pinned by Snyk to avoid a vulnerability
